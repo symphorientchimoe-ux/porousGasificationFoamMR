@@ -1,0 +1,7 @@
+#!/bin/sh
+# Quick installation check: 2 s of the reference run (kimReactor149_lid) restarted from its state at 2400 s,
+# serial, with a bed collapse every 0.5 s (20 s in the full run) so that the collapse remap is exercised.
+# Run time: a few minutes on one core. Then run ./check.sh to compare with reference/.
+cd "${0%/*}" || exit 1
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+runApplication porousGasificationFoamMR

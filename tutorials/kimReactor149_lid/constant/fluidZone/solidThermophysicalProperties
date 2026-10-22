@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    object      solidThermophysicalProperties;
+}
+
+thermoType solidMixtureThermo<constHeterogeneous>;
+
+solidComponents
+(
+  moisture fuel char ash refractory
+);
+
+moistureCoeffs
+{
+
+    transport      { K 0.6; }
+    thermodynamics { Cp 4186; Hf 0; }
+    density        { rho 1000; }
+};
+
+fuelCoeffs
+{
+
+    transport      { K   0.17; }
+
+    thermodynamics { Cp  1950; Hf 0; }
+    density        { rho 1220; }
+};
+
+charCoeffs
+{
+
+    transport      { K   0.15; }
+    thermodynamics { Cp  1650; Hf 0; }
+
+    density        { rho 305; }
+};
+
+ashCoeffs
+{
+
+    transport      { K   0.15; }
+    thermodynamics { Cp  1200; Hf -12.38e6; }
+    density        { rho 2162; }
+};
+
+refractoryCoeffs
+{
+
+    transport      { K 0.001; }
+    thermodynamics { Cp 900; Hf 0; }
+    density        { rho 955; }
+};
+
+// ************************************************************************* //

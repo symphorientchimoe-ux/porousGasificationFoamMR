@@ -1,0 +1,5 @@
+#!/bin/sh
+# Keeps the initial state (60) ; removes the decomposition, the results and the logs.
+cd "${0%/*}" || exit 1
+rm -rf processor* postProcessing log.*
+for d in [0-9]*; do [ "$d" = 60 ] || rm -rf "$d"; done

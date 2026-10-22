@@ -1,0 +1,18 @@
+#!/bin/sh
+# Counter-current wood-pellet bed of Kim et al. (Waste Management 49, 2016), primary air 149 kg m-2 h-1,
+# 5 mm bed cells: the reference validation run of the paper (Section 5). Two processors.
+# The igniter is held at 800 K for the first 60 s (starting at 1000 K diverges), then at 1000 K until
+# igniterDuration (300 s). The igniter settings are read only at start-up, hence the two stages.
+# Run time: about 35 h on two cores of a 4-core 2016 workstation to reach the front at T1 (about 4300 s simulated).
+cd "${0%/*}" || exit 1
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+rm -rf 0 && cp -r 0.orig 0
+runApplication setFields -region fluidZone
+runApplication decomposePar -allRegions
+P=constant/fluidZone/pyrolysisProperties
+foamDictionary -entry pyrolysisCoeffs/igniterTemperature -set 800 $P
+foamDictionary -entry endTime -set 60 system/controlDict
+runParallel -s stage1 porousGasificationFoamMR
+foamDictionary -entry pyrolysisCoeffs/igniterTemperature -set 1000 $P
+foamDictionary -entry endTime -set 5000 system/controlDict
+runParallel -s stage2 porousGasificationFoamMR

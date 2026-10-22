@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/fluidZone";
+    object      setFieldsDict;
+}
+
+bedPorosity     0.38;
+
+defaultFieldValues
+(
+    volScalarFieldValue Ts          300
+    volScalarFieldValue porosityF   1
+    volScalarFieldValue porosityF0  1
+    volScalarFieldValue Ymoisture   0
+    volScalarFieldValue Yfuel       0
+    volScalarFieldValue Ychar       0
+    volScalarFieldValue Yash        0
+);
+
+regions
+(
+    zoneToCell
+    {
+        name    biomass_bed;
+        fieldValues
+        (
+            volScalarFieldValue porosityF   $bedPorosity
+            volScalarFieldValue porosityF0  $bedPorosity
+            volScalarFieldValue Ymoisture   0.0799
+            volScalarFieldValue Yfuel       0.9184
+            volScalarFieldValue Ychar       0
+            volScalarFieldValue Yash        0.0017
+        );
+    }
+);
+
+// ************************************************************************* //

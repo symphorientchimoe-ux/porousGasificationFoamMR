@@ -1,0 +1,139 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      chemistryProperties;
+}
+
+chemistry           on;
+
+chemistryType
+{
+    solver            ode;
+}
+
+reactions
+{
+    COoxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "CO + 0.5O2^0.25 + H2O^0.5 = CO2 + H2O";
+        A        2.239e12;
+        beta     0;
+        Ta       20470;
+    }
+    H2oxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "H2 + 0.5O2^1 = H2O";
+        A        9.87e8;
+        beta     0;
+        Ta       3728.4;
+    }
+    CH4oxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "CH4^0.7 + 0.5O2^0.8 = CO + 2H2";
+        A        5.012e11;
+        beta     0;
+        Ta       24054;
+    }
+    TARoxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "C6H5OH^0.5 + 4O2^1 = 6CO + 3H2O";
+        A        1.1185e8;
+        beta     1;
+        Ta       9621.7;
+    }
+
+}
+
+solidChemistryType
+{
+    solver              solidOde;
+    method              ODESolidHeterogeneousChemistryModel;
+    solidThermoType     const<constRad<constThermo<constRho>>>;
+}
+
+chemistrySolver     ode;
+
+solidChemistrySolver	solidOde;
+
+initialChemicalTimeStep 1e-5;
+
+gasChemistryTimeStepControl true;
+
+gasAlphaTemp 0.1;
+
+turbulentReaction   off;
+solidReactionEnergyFromEnthalpy false;
+stoichiometricReactions false;
+showRelativeReactionRates false;
+
+diffusionLimitedReactions true;
+
+odeCoeffs
+{
+    solver          Rosenbrock34;
+    absTol          1e-10;
+    relTol          1e-6;
+    maxSteps        100000;
+}
+
+solidOdeCoeffs
+{
+
+    solver      RKF45;
+    absTol      1e-8;
+    relTol      0.01;
+    maxSteps    100000;
+}
+
+species
+(
+    CO N2 O2 CO2 H2 CH4 H2O C6H5OH
+);
+
+solidReactions
+(
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    moisture = 1.0 H2O
+    (1e4 6000 373 2.26e6 1.0)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 fuel = 20 char + 10.13 CO + 19.24 CO2 + 0.94 H2 + 1.67 CH4 + 25.17 H2O + 22.85 C6H5OH
+    (4.4e9 16982 300 4.2e5 1.0)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 32 O2 = 44 CO2
+    (5.61e9 19600 300 -8.945e6 1.0 1.0)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 16 O2 = 28 CO
+    (1.4025e13 25849 300 -3.947e6 1.0 1.0)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 44 CO2 = 56 CO
+    (3.6e5 29000 300 3.064e6 1.0 1.0)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 18 H2O = 28 CO + 2 H2
+    (2e5 28000 300 4.36e6 1.0 1.0)
+);
+
+// ************************************************************************* //

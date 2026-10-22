@@ -1,0 +1,28 @@
+bedCollapse at t = 2400.50020843 (shrinkA 0.8, phiS0Ref 0.62)
+    bed top axis column : 0.35 -> 0.345001255263 m ; all columns min/max : 0.35/0.35 -> 0.345001255263/0.347859930159 m
+    cells emptied 1, top residues merged 1, h clamped to dz 6, porosity<0 clipped 0, max |Vs(rho_i) - Vs(remap)|/V 4.61910572822e-16
+    conservation M(Ymoisture) [kg] : before 0.00973544198507493 after 0.00973544198507493 rel 3.56e-16
+    conservation M(Yfuel) [kg] : before 0.116122255367173 after 0.116122255367173 rel 2.39e-16
+    conservation M(Ychar) [kg] : before 0.0112203138906711 after 0.011220313890671 rel -9.28e-16
+    conservation M(Yash) [kg] : before 0.000372688383841663 after 0.000372688383841662 rel -4.36e-16
+bedCollapse at t = 2401.00033583 (shrinkA 0.8, phiS0Ref 0.62)
+    bed top axis column : 0.345 -> 0.344989140054 m ; all columns min/max : 0.345/0.35 -> 0.344989140054/0.347847556464 m
+    cells emptied 0, top residues merged 0, h clamped to dz 7, porosity<0 clipped 0, max |Vs(rho_i) - Vs(remap)|/V 3.73081614632e-16
+    conservation M(Ymoisture) [kg] : before 0.00973390700232153 after 0.00973390700232154 rel 1.6e-15
+    conservation M(Yfuel) [kg] : before 0.116107812944856 after 0.116107812944856 rel 1.2e-16
+    conservation M(Ychar) [kg] : before 0.0112216836047169 after 0.0112216836047169 rel -1.55e-15
+    conservation M(Yash) [kg] : before 0.000372688383841662 after 0.000372688383841662 rel 7.27e-16
+bedCollapse at t = 2401.50029929 (shrinkA 0.8, phiS0Ref 0.62)
+    bed top axis column : 0.345 -> 0.344980198839 m ; all columns min/max : 0.345/0.35 -> 0.344980198839/0.347833718382 m
+    cells emptied 0, top residues merged 0, h clamped to dz 7, porosity<0 clipped 0, max |Vs(rho_i) - Vs(remap)|/V 5.38895676129e-16
+    conservation M(Ymoisture) [kg] : before 0.00973237286402223 after 0.00973237286402225 rel 1.25e-15
+    conservation M(Yfuel) [kg] : before 0.116093850440986 after 0.116093850440986 rel 4.78e-16
+    conservation M(Ychar) [kg] : before 0.0112229257076054 after 0.0112229257076054 rel -7.73e-16
+    conservation M(Yash) [kg] : before 0.000372688383841662 after 0.000372688383841662 rel 1.16e-15
+bedCollapse at t = 2402 (shrinkA 0.8, phiS0Ref 0.62)
+    bed top axis column : 0.345 -> 0.344970471524 m ; all columns min/max : 0.345/0.35 -> 0.344970471524/0.347819227371 m
+    cells emptied 0, top residues merged 0, h clamped to dz 7, porosity<0 clipped 0, max |Vs(rho_i) - Vs(remap)|/V 4.85006097655e-16
+    conservation M(Ymoisture) [kg] : before 0.00973083972516659 after 0.00973083972516661 rel 1.78e-15
+    conservation M(Yfuel) [kg] : before 0.116080141340092 after 0.116080141340092 rel -1.2e-16
+    conservation M(Ychar) [kg] : before 0.0112241183427819 after 0.0112241183427819 rel 3.09e-16
+    conservation M(Yash) [kg] : before 0.000372688383841662 after 0.000372688383841663 rel 1.75e-15

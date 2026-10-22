@@ -1,0 +1,119 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2;
+    format          ascii;
+    class           dictionary;
+    location        "system";
+    object          controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     porousGasificationFoamMR_epsR_dbg;
+
+DebugSwitches
+{
+    SolverPerformance 1;
+}
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         2402;
+
+deltaT          0.0001;
+
+writeControl    adjustableRunTime;
+
+writeInterval   2;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  12;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.7;
+
+maxDi           10;
+
+maxRa           5;
+
+maxGa           1;
+
+maxUa           0.3;
+
+UaSmall         0.01;
+
+functions
+{
+    #include        "sondesNominales"
+    #include        "sondesAxe"
+    probesKim_fluid
+    {
+        type            probes;
+        libs            ( "libsampling.so" );
+        region          fluidZone;
+        writeControl    runTime;
+        writeInterval   5;
+        fields          ( T Ts O2 CO CO2 H2 CH4 H2O C6H5OH U p porosityF Ymoisture Yfuel Ychar Yash );
+        probeLocations  ( ( 0.002 0 0.1005 ) ( 0.002 0 0.1505 ) ( 0.002 0 0.2005 ) ( 0.002 0 0.2505 ) ( 0.002 0 0.3005 ) ( 0.002 0 0.3505 ) ( 0.002 0 0.3995 ) ( 0.002 0 0.4505 ) ( 0.002 0 0.5005 ) ( 0.002 0 0.5505 ) ( 0.002 0 0.05 ) ( 0.002 0 0.695 ) );
+    }
+    probesKim_solid
+    {
+        type            probes;
+        libs            ( "libsampling.so" );
+        region          solidZone;
+        writeControl    runTime;
+        writeInterval   5;
+        fields          ( T );
+        probeLocations  ( ( 0.175 0 0.1505 ) ( 0.175 0 0.2505 ) ( 0.175 0 0.3505 ) ( 0.175 0 0.5005 ) );
+    }
+    massFlowIn
+    {
+        type            surfaceFieldValue;
+        libs            ( "libfieldFunctionObjects.so" );
+        region          fluidZone;
+        writeControl    timeStep;
+        writeInterval   200;
+        regionType      patch;
+        name            inlet;
+        operation       sum;
+        fields          ( phi );
+        writeFields     false;
+        log             true;
+    }
+    massFlowOut
+    {
+        $massFlowIn     ;
+        name            outlet;
+    }
+}
+
+updateK         yes;
+
+ergunInertialEps yes;
+
+ergunDp         0.00682;
+
+
+// ************************************************************************* //

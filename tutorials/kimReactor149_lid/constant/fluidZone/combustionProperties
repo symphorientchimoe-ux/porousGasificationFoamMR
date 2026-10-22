@@ -1,0 +1,39 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      combustionProperties;
+}
+
+combustionModel  laminarEDM<psiReactionThermo>;
+
+active           true;
+
+laminarEDMCoeffs
+{
+    A        4;
+    B        0.5;
+    oxidant  O2;
+    reactions
+    (
+        COoxidation  { fuel CO;  s 0.5714; products (CO2); }
+        H2oxidation  { fuel H2;  s 7.937;  products (H2O); }
+        CH4oxidation { fuel CH4; s 0.9975; products (CO H2); }
+        TARoxidation { fuel C6H5OH; s 1.3600; products (CO H2O); }
+    );
+}
+
+laminarCoeffs
+{
+}
+
+// ************************************************************************* //

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Reference run of the paper (Section 5, Table 7): counter-current wood-pellet bed of Kim et al. (2016),
+# primary air 149 kg m-2 h-1, 5 mm bed cells, reactor closed by a lid with a central 40 mm outlet, as in the experiment.
+# The run starts from the state of the open-top case (../kimReactor149) at 60 s, the end of its 800 K igniter stage:
+# a cold start with the lid already in place stopped within the first 0.04 s. From 60 s the igniter
+# is held at 1000 K until 300 s, then the bed burns freely. Run time: about three times that of the open-top case (5 days).
+cd "${0%/*}" || exit 1
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+runApplication decomposePar -allRegions -time 60
+foamDictionary -entry pyrolysisCoeffs/igniterTemperature -set 1000 constant/fluidZone/pyrolysisProperties
+foamDictionary -entry endTime -set 5000 system/controlDict
+runParallel porousGasificationFoamMR

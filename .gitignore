@@ -1,0 +1,13 @@
+# OpenFOAM build files
+lnInclude/
+Make/linux64*/
+Make/darwin*/
+*.o
+*.dep
+# case outputs
+processor*/
+postProcessing/
+log.*
+!tutorials/**/reference/**
+# personal prompt log written by a local hook
+JOURNAL_PROMPTS.md

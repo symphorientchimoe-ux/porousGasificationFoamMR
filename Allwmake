@@ -1,0 +1,15 @@
+#!/bin/sh
+# Builds the porousGasificationMedia libraries and the porousGasificationFoamMR solver (OpenFOAM-8).
+# Libraries go to $FOAM_USER_LIBBIN, the solver to $FOAM_USER_APPBIN (standard OpenFOAM user locations).
+# Usage: source <OpenFOAM-8>/etc/bashrc ; ./Allwmake
+cd "${0%/*}" || exit 1
+[ -n "$WM_PROJECT_DIR" ] || { echo "Source the OpenFOAM-8 environment first"; exit 1; }
+export FOAM_HGS=$PWD/src/porousGasificationMedia
+mkdir -p "$FOAM_USER_LIBBIN" "$FOAM_USER_APPBIN"
+set -e
+(cd $FOAM_HGS/fieldPorosityModel && wmake libso)
+(cd $FOAM_HGS/radiationModels && wmake libso)
+(cd $FOAM_HGS/thermophysicalModels && ./Allwmake)
+(cd $FOAM_HGS/pyrolysisModels && wmake libso)
+(cd applications/solvers/porousGasificationFoamMR && wmake)
+echo "porousGasificationFoamMR built: $FOAM_USER_APPBIN/porousGasificationFoamMR"

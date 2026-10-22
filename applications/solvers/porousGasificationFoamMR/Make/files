@@ -1,0 +1,7 @@
+porousGasificationFoamMR.C
+solidRegionDiffNo.C
+makeBoundedArrheniusReactions.C
+makeStrainMixingLimitedCombustion.C
+makeLaminarEDMCombustion.C
+
+EXE = $(FOAM_USER_APPBIN)/porousGasificationFoamMR
