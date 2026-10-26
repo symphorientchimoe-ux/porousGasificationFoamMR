@@ -119,7 +119,7 @@ elif [ -f ARRET_ATTEINT ]; then
 # fin atteinte : dernier temps écrit ou dernier pas calculé (après une reprise, OpenFOAM 8 compte les
 # instants d'écriture depuis le temps de reprise, si bien que endTime n'est pas toujours écrit)
 elif LASTRUN=$(grep -E '^Time = ' "$LOG" | tail -1 | awk '{print $3}'); \
-     python3 -c "import sys; sys.exit(0 if max(float('$LAST'), float('${LASTRUN:-0}')) >= 0.9999*float('$END') else 1)"; then
+     python3 -c "import sys; sys.exit(0 if max(float('$LAST'), float('${LASTRUN:-0}')) >= float('$END')*(1 - 1e-9) else 1)"; then
     echo termine > ETAT
 else
     echo a_reprendre > ETAT
