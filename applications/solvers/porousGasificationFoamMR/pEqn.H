@@ -75,6 +75,16 @@ else
           + Srho   // 2026-10-12: no (1 - porosityF) factor, see the header
         );
 
+        // v1.1 (2026-10-26, paper Section 3.3): ddt(porosityF*psi, p) acts on a
+        // temporary whose old-time value is its current value, so it gives
+        // eps psi dp/dt only and loses p d(eps psi)/dt (porosity change and
+        // thermal expansion). The missing part, explicit in p.oldTime(), makes
+        // the storage term (eps psi p - (eps psi p)^o)/dt, as in rhoEqn.
+        if (conservativeDdt)
+        {
+            pEqn += fvc::ddt(porosityF, psi)*p.oldTime();
+        }
+
         dbgStop("G_pEqn_matrix", dbgMatrix("G_pEqn_matrix", pEqn));   // NaN check
 
         pEqn.solve();
@@ -109,8 +119,8 @@ fvOptions.correct(U);
 // H5 (2026-09-26, code analysis): K is created once in createFields.H and was only
 // updated in pcEqn.H (unused), so fvc::ddt(...,K) was 0 and div(phi,K) used the K of
 // the restart. Opt-in switch so running/restarted cases are unchanged:
-// system/controlDict "updateK yes;"
-if (runTime.controlDict().lookupOrDefault<Switch>("updateK", false))
+// system/controlDict "updateK yes;" (v1.1, 2026-10-26: default yes, updateK no = v1.0)
+if (runTime.controlDict().lookupOrDefault<Switch>("updateK", true))
 {
     K = 0.5*magSqr(U);
 }

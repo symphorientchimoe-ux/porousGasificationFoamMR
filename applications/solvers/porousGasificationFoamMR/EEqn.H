@@ -58,9 +58,9 @@ if (solveEnergy)
         // below: it is one of the defects described in the paper, Section 3.7.)
         fvScalarMatrix EEqn
         (
-            fvm::ddt(porosityF * rho, he)
+            (conservativeDdt ? fvm::ddt(porosityF, rho, he) : fvm::ddt(porosityF*rho, he))
           + fvm::div(phi, he)
-          + fvc::ddt(porosityF * rho, K)
+          + (conservativeDdt ? fvc::ddt(porosityF, rho, K) : fvc::ddt(porosityF*rho, K))
           + fvc::div(phi, K)
           + (
                 he.name() == "e"

@@ -52,7 +52,7 @@ tmp<fv::convectionScheme<scalar>> mvConvection
 
             fvScalarMatrix YiEqn
             (
-                fvm::ddt(porosityF * rho, Yi)
+                (conservativeDdt ? fvm::ddt(porosityF, rho, Yi) : fvm::ddt(porosityF*rho, Yi))
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(porosityFf2 * muEfff, Yi)
              ==
@@ -90,7 +90,7 @@ tmp<fv::convectionScheme<scalar>> mvConvection
 
             fvScalarMatrix YiEqn
             (
-                fvm::ddt(porosityF*rho, Yi)
+                (conservativeDdt ? fvm::ddt(porosityF, rho, Yi) : fvm::ddt(porosityF*rho, Yi))
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(porosityFf2 * muEfff, Yi)
             );

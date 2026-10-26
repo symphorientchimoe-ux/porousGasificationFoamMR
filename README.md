@@ -62,7 +62,7 @@ Unless stated otherwise, a feature is off, or reproduces the behaviour of porous
 | Porosity-weighted realizability cap of laminarEDM | `laminarEDMCoeffs` | `porosityWeightedCap` (no) |
 | Ergun resistance from the local porosity | cellZone `biomass_bed`; `system/controlDict` | always on if the zone exists; `ergunDp` particle diameter (0.05 m) |
 | Inertial Ergun term | `system/controlDict` | `ergunInertialEps` (no); then set `forchheimerCoeff 0` in `constant/fluidZone/porosityProperties` |
-| Kinetic energy update after the pressure correction | `system/controlDict` | `updateK` (no) |
+| Kinetic energy update after the pressure correction | `system/controlDict` | `updateK` (yes since 1.1; no in 1.0) |
 | Bed collapse | `constant/fluidZone/pyrolysisProperties`, `pyrolysisCoeffs` | `bedCollapse` (off), `shrinkA` (0.8), `collapseInterval` (20 s), `bedZoneName`, `phiS0Ref`, `phiS0Init`, `collapseMinPhis` (1e-3) |
 | Held igniter | `pyrolysisCoeffs` | `igniterCellSet`, `igniterTemperature`, `igniterDuration` |
 | Porosity ceiling from the ash | `pyrolysisCoeffs` | `ashDensity` (650 kg/m³) |
@@ -73,6 +73,18 @@ Unless stated otherwise, a feature is off, or reproduces the behaviour of porous
 | Bounded Arrhenius rate (temperature floored above 0 K) | `constant/reactions` | reaction type `irreversibleBoundedArrhenius` |
 
 The defaults and the dictionaries above were checked against the `lookupOrDefault` calls of the source (22/10/2026).
+
+### Corrections of version 1.1
+
+Each correction of version 1.1 has a switch; with all of them set to `no`, version 1.1 reproduces version 1.0 bit for bit
+(same log and fields on a 2 s restart of the reference case).
+
+| Correction | Where | Keyword (default in 1.1) |
+|---|---|---|
+| Storage terms in conservative form, `ddt(porosityF, rho, X)` with the old-time porosity and density (species, energy), and the missing `p d(porosityF psi)/dt` part of the pressure equation; closes the global mass balance | `system/controlDict` | `conservativeDdt` (yes) |
+| Boundary values of the bed indicator `whereIs` in the P1 model copied from the adjacent cell (they stayed at 1, so the wall diffusion coefficient included the bed absorption next to pure gas) | `radiationProperties` | `boundaryWhereIs` (yes) |
+| Exact border factor of the bed: area of the faces shared with gas cells divided by the cell volume (the cell length used before gave 29% less on the bed top of a wedge mesh); written as `surfFrad` | `radiationProperties` | `exactBorderFactor` (yes) |
+| Initial gas-chemistry time step applied at a start from t = 0 only, not at every restart, so that a restarted run continues the same sequence of time steps (write times with `writePrecision 17`) | `system/controlDict` | `exactRestart` (yes) |
 
 ## Test cases
 

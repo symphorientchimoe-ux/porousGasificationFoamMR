@@ -200,6 +200,22 @@ volScalarField porosityF
         mesh
 );
 
+// v1.1 (2026-10-26, paper Section 3.3): storage terms of the species, energy
+// and pressure equations in conservative form, ddt(porosityF, rho, X) with the
+// old-time porosity and density instead of ddt(porosityF*rho, X) on a
+// temporary (old value = current value, d(eps rho)/dt lost). Off = v1.0.
+const Switch conservativeDdt
+(
+    runTime.controlDict().lookupOrDefault<Switch>("conservativeDdt", true)
+);
+Info<< "conservativeDdt " << conservativeDdt << endl;
+if (conservativeDdt)
+{
+    // start the old-time tracking of psi now, so the first step after a
+    // start or a restart has the right old value
+    thermo.psi().oldTime();
+}
+
 volScalarField radiationF
 (
         IOobject
