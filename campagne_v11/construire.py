@@ -57,13 +57,14 @@ CAS = {
 }
 
 def multiplier(path, motif, facteur):
-    s = open(path, encoding='latin1').read()
+    # newline='' : le fichier U à 60 s est en binaire, la conversion des fins de ligne le corrompait (E1-E3, 26/10)
+    s = open(path, encoding='latin1', newline='').read()
     m = re.search(motif + r'([0-9.eE+-]+)', s)
     if not m:
         sys.exit(f'motif introuvable : {motif} dans {path}')
     v = float(m.group(1)) * facteur
     s = s[:m.start(1)] + f'{v:.10g}' + s[m.end(1):]
-    open(path, 'w', encoding='latin1').write(s)
+    open(path, 'w', encoding='latin1', newline='').write(s)
     return m.group(1), f'{v:.10g}'
 
 def regler(path, cle, valeur):
@@ -112,7 +113,7 @@ rm -rf 60
         if f == 'U_inlet':
             for p in procs:
                 path = os.path.join(d, p, '60', 'fluidZone', 'U')
-                s = open(path, encoding='latin1').read()
+                s = open(path, encoding='latin1', newline='').read()
                 if 'massFlowRate' not in s:
                     continue
                 a, b = multiplier(path, r'massFlowRate\s+constant\s+', fac)
