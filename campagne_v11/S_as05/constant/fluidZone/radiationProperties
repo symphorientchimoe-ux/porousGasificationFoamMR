@@ -1,0 +1,58 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Identique a test99 (heterogeneousP1 + CL MarshakRadiation a l'interface
+// lit/refractaire) sauf 'as', qui depend du lit de granules.
+// NB : le mot-cle "radiation off" est ignore par le solveur (le modele est
+// choisi par heterogeneousRadiationModel) -- conserve comme dans test99.
+
+radiation       off;  // laisse tel quel -- confirme sans effet (test99)
+
+heterogeneousRadiationModel  heterogeneousP1;
+
+solverFreq 1;
+
+heterogeneousAbsorptionEmissionModel heterogeneousConstantAbsorptionEmission;
+
+heterogeneousConstantAbsorptionEmissionCoeffs
+{
+    // absorption gaz non lumineux (valeur de depart test99, non calibree)
+    a               a  [ 0 -1  0 0 0 0 0 ] 0.1;
+    // absorption du lit : as ~ (1-eps)/dp (test99 : (1-0.481)/0.049 = 10.6)
+    // 2026-09-29 : as = (1-eps)/d_sv = (1-0.38)/0.00682 = 90.9 1/m (formule
+    // projet, sources_devol_rayonnement_2026-09-27.md sect. 2.1 ;
+    // model_properties ligne 22, DERIVE ; plage 84-147 selon eps et formule)
+    as              as [ 0 -1  0 0 0 0 0 ] 45.45;   // [1/m] DERIVE
+    // CL de Marshak cote solide : borderAs = chi/borderL, chi = e/(2(2-e)),
+    // e = 0.85 emissivite du charbon (0.8-0.95, Vanaparti 2016 ; test85)
+    // -> 246 1/m. Emissivite du char de bois du meme ordre : conserve,
+    // a confirmer dans data/ si une valeur specifique est retenue.
+    borderAs        borderAs [ 0 -1  0 0 0 0 0 ] 123;
+    E               E  [ 1 -1 -3 0 0 0 0 ] 0.0;
+    borderL         borderL  [ 0 1 0 0 0 0 0 ] 1.5e-3;
+}
+
+nRadCorrectors  1;
+
+qrRelax         0.3;   // 2026-10-14 sous-relaxation de qr a la paroi couplee (lib_consQr, CONSTATS 21.33) : supprime l'oscillation T face <-> qr, cause des NaN
+
+scatterModel    constant;
+
+sigma           sigma [ 0 -1 0 0 0 0 0 ] 1;
+
+C               C [ 0 0 0 0 0 0 0 ] 1;
+
+// ************************************************************************* //

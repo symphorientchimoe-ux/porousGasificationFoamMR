@@ -1,0 +1,62 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/solidZone";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Garnissage refractaire 50 mm du reacteur de Kim 2016 (sect. 2.2 : "had a
+// refractory lining (thickness 50 mm)"). Nature, masse volumique, Cp et
+// conductivite du refractaire : NON DONNES -> placeholders (meme modele
+// heSolidThermo/constIso que test99 ; test99 = geopolymere 955 / 900 / 0.53).
+// NB : l'inertie thermique du refractaire compte sur 2-4 h d'essai
+// (diffusivite ~5e-7 m2/s -> penetration ~ sqrt(a t) ~ 6 cm en 2 h).
+
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          eConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight       100;
+    }
+    equationOfState
+    {
+        // 2026-09-29 : HYPOTHESE declaree (nature du garnissage non donnee par Kim) :
+        //   brique refractaire dense silico-alumineuse, "Fireclay, burnt 1600 K",
+        //   Incropera et al., Fundamentals of Heat and Mass Transfer, 7e ed.,
+        //   Table A.3 (lue) : rho 2050, cp 960, k 1.0 (773 K) / 1.1 (1073 K).
+        //   Plage a tester : k 0.1-1.5 (fibre / beton isolant / beton dense),
+        //   experiment_setup.md sect. 1.
+        rho             2050;   // [kg/m3] Incropera Table A.3, HYPOTHESE declaree (nature du garnissage non donnee par Kim)
+    }
+    thermodynamics
+    {
+        Hf              0;
+        Cv              960;    // [J/kg/K] Incropera Table A.3 (cp ; Cv = cp pour un solide), HYPOTHESE declaree (nature du garnissage non donnee par Kim)
+    }
+    transport
+    {
+        kappa           0.5;    // [W/m/K] Incropera Table A.3 a 773 K, HYPOTHESE declaree (nature du garnissage non donnee par Kim)
+    }
+}
+
+// ************************************************************************* //

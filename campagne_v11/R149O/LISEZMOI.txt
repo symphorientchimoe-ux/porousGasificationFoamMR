@@ -1,0 +1,2 @@
+R149O : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+endTime 15000

@@ -1,0 +1,199 @@
+// v5 (2026-09-09) : especes gaz etendues, coefficients JANAF (GRI-Mech 3.0)
+// portes depuis reint/constant/thermo.compressibleGas -- produits de la
+// devolatilisation et de l'oxydation partielle/Boudouard/gaz-a-l'eau du
+// mecanisme solide (constant/chemistryProperties).
+species
+(
+   CO
+   N2
+   O2
+   CO2
+   H2
+   CH4
+   H2O
+   C6H5OH   // Kim 2016 (2026-09-29) : goudron (phenol), DERNIER -- ordre IDENTIQUE a 'species' de chemistryProperties (bug Srho RRg(i))
+);
+
+CO
+{
+    specie
+    {
+        molWeight       28.0106;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           6000;
+        Tcommon         1000;
+        highCpCoeffs    ( 3.04849 0.00135173 -4.85794e-07 7.88536e-11 -4.69807e-15 -14266.1 6.0171 );
+        lowCpCoeffs     ( 3.57953 -0.000610354 1.01681e-06 9.07006e-10 -9.04424e-13 -14344.1 3.50841 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+N2
+{
+    specie
+    {
+        nMoles          1;
+        molWeight       28.0134;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           5000;
+        Tcommon         1000;
+        highCpCoeffs    ( 2.92664 0.00148798 -5.68476e-07 1.0097e-10 -6.75335e-15 -922.798 5.98053 );
+        lowCpCoeffs     ( 3.29868 0.00140824 -3.96322e-06 5.64152e-09 -2.44486e-12 -1020.9 3.95037 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+O2
+{
+    specie
+    {
+        molWeight       31.9988;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           6000;
+        Tcommon         1000;
+        highCpCoeffs    ( 3.66096 0.000656366 -1.4115e-07 2.05798e-11 -1.29913e-15 -1215.98 3.41536 );
+        lowCpCoeffs     ( 3.78246 -0.00299673 9.8473e-06 -9.6813e-09 3.24373e-12 -1063.94 3.65768 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+CO2
+{
+    specie
+    {
+        molWeight       44.01;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           3500;
+        Tcommon         1000;
+        highCpCoeffs    ( 4.63659493 0.00274131991 -9.95828531e-07 1.60373011e-10 -9.16103468e-15 -49024.9341 -1.93534855 );
+        lowCpCoeffs     ( 2.35677352 0.00898459677 -7.12356269e-06 2.45919022e-09 -1.43699548e-13 -48371.9697 9.90105222 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+H2
+{
+    specie
+    {
+        molWeight       2.01588;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           3500;
+        Tcommon         1000;
+        highCpCoeffs    ( 3.3372792 -0.0000494024731 4.99456778e-07 -1.79566394e-10 2.00255376e-14 -950.158922 -3.20502331 );
+        lowCpCoeffs     ( 2.34433112 0.00798052075 -1.9478151e-05 2.01572094e-08 -7.37611761e-12 -917.935173 0.683010238 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+CH4
+{
+    specie
+    {
+        molWeight       16.0425;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           3500;
+        Tcommon         1000;
+        highCpCoeffs    ( 0.0748514950 0.0133909467 -5.73285809e-06 1.22292535e-09 -1.01815230e-13 -9468.34459 18.4373180 );
+        lowCpCoeffs     ( 5.14987613 -0.0136709788 4.91800599e-05 -4.84743026e-08 1.66693956e-11 -10246.6476 -4.64130376 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+H2O
+{
+    specie
+    {
+        molWeight       18.01528;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           3500;
+        Tcommon         1000;
+        highCpCoeffs    ( 2.6770389 0.0029731816 -7.7376889e-07 9.4433514e-11 -4.2689991e-15 -29885.894 6.88255 );
+        lowCpCoeffs     ( 4.1986352 -0.0020364017 6.5203416e-06 -5.4879269e-09 1.771968e-12 -30293.726 -0.849009010 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+// Kim 2016 (2026-09-29) : goudron lumped = phenol C6H5OH (C6H6O). Coefficients NASA-7
+// copies SANS MODIFICATION de $FOAM_ETC/thermoData/thermoData (OpenFOAM-8), entree
+// "C6H5OH,phenol" (virgule retiree du nom, pour un mot OpenFOAM valide), elle-meme issue
+// de la base Burcat-Goos-Ruscic (etc/thermoData/therm.dat l.4560, "C6H5OH,phenol g 8/00",
+// 200-6000 K). hf(298 K) = -96.4 kJ/mol (recalcule par wood_pyrolysis_closure.py).
+// Transport : Sutherland "air" (As, Ts) identique aux autres especes (choix projet).
+C6H5OH
+{
+    specie
+    {
+        molWeight       94.1141;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           6000;
+        Tcommon         1000;
+        highCpCoeffs    ( 14.1552 0.019935 -7.1822e-06 1.16229e-09 -6.97147e-14 -18128.7 -51.7985 );
+        lowCpCoeffs     ( -0.290979 0.0408562 2.42829e-05 -7.14478e-08 3.46002e-11 -13413 26.8746 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
+// Refr (espece traceur gaz, v3, 2026-09-08) retiree (2026-09-11) : ne
+// servait qu'a eviter Yt=0 dans une cellZone "refractory" DANS fluidZone --
+// cette zone n'existe plus la depuis le passage multi-region (v4, deplacee
+// dans solidZone, qui n'a pas de champs de fraction massique gazeuse du
+// tout). Le probleme qu'elle resolvait ne peut donc plus se produire. Voir
+// SUIVI_MAILLAGEREEL_V6.md.
+
+// ************************************************************************* //

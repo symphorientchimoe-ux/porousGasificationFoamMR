@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler; 
+}
+
+gradSchemes
+{
+    default         Gauss linear; 
+}
+
+divSchemes
+{
+    default         none;
+
+    div(phi,U)      Gauss linearUpwindV default;
+    div(phi,Yi)     Gauss upwind;
+    div(phi,h)      Gauss upwind;
+    div(phi,K)      Gauss upwind;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // v3 (2026-09-08) : tentative "linear" -> "harmonic" testee et
+    // ABANDONNEE -- fait planter le solveur (MPI_ABORT) car un terme
+    // laplacien TENSORIEL ailleurs dans le solveur (conductivite thermique
+    // anisotrope, cf champ anisotropyK -- vraisemblablement dans
+    // thermophysicalTransport->divq(he), EEqn.H) retombe aussi sur ce
+    // "default", et le schema "harmonic" n'est pas implemente pour le type
+    // Tensor dans cette version d'OpenFOAM. Voir SUIVI_MAILLAGEREEL_V3.md
+    // pour le diagnostic complet et la piste retenue a la place (fix cote
+    // solveur, cible uniquement sur porosityF dans YEqn.H/EEqn.H).
+    default         Gauss linear orthogonal;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         orthogonal;
+}
+
+// ************************************************************************* //

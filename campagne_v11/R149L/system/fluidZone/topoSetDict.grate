@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/fluidZone";
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Plaque perforee support du lit (Kim 2016, sect. 2.2 et Fig. 1 : "A
+// perforated plate was placed inside the reactor to support the bed of fuel
+// particles and distribute air uniformly"). Meme mise en oeuvre que test96/99 :
+// cellZone 'grate' = les 5 couches de 2.5 mm (12.5 mm) du plenum JUSTE SOUS le
+// lit (z 0.0875-0.100 m), sur toute la section (r < 0.150 m). Une couche unique
+// est contournee numeriquement (test95 : ~0.2 Pa au lieu de ~5 Pa) -> 5 couches.
+// Epaisseur de 12.5 mm fixe dans les 3 variantes de maillage (bloc dedie dans
+// blockMeshDict) : f = zeta/L identique quel que soit le maillage.
+actions
+(
+    { name grate; type cellSet;     action new; source boxToCell;     sourceInfo { box (-0.001 -0.02 0.0875) (0.151 0.02 0.100); } }
+    { name grate; type cellZoneSet; action new; source setToCellZone; sourceInfo { set grate; } }
+);
+
+// ************************************************************************* //

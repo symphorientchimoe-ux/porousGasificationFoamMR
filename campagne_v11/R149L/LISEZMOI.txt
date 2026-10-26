@@ -1,0 +1,4 @@
+R149L : débit 149 kg/m2h, couvercle oui, départ base_149 à 60 s
+couvercle posé à 60 s (poser_couvercle.py)
+arrêt 420 s après le passage à 600 °C de la colonne 2
+endTime 9000

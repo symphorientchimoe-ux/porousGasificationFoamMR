@@ -1,0 +1,185 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// VALIDATION Kim et al. 2016 (Waste Management, doi:10.1016/j.wasman.2016.01.040)
+// Granules de bois (wood pellet), debit d'air 149 kg/m2/h, lit fixe a
+// contre-courant (updraft), allumage par le haut (kerosene).
+// Cas construit le 2026-09-29 a partir de
+// gasifier_maillageReel_v8_wbtGeometry_test99_coldGrateEpsR (NUMERIQUE
+// IDENTIQUE a test99 : PBiCGStab, laminarEDM, Ergun inertiel a porosite
+// locale, bedCollapse, updateK, heterogeneousP1 + MarshakRadiation paroi,
+// turbulentTemperatureRadCoupledMixed, grille = explicitPorositySource sur
+// 5 couches, gasAlphaTemp 0.1, criteres maxCo/maxDi/maxRa/maxGa/maxUa).
+// Voir README_case.md pour la source de chaque choix et la liste des
+// placeholders a remplir AVANT tout calcul (Allrun.solve refuse de
+// demarrer tant qu'il en reste).
+//
+// Executable : porousGasificationFoamMR_epsR (source especes ponderee par
+// eps, validee test98 ; c'est l'executable reellement lance pour test99).
+
+application     porousGasificationFoamMR_epsR_dbg;   // 2026-10-05 binaire instrumente (garde-fou NaN/T), FPE non piege
+
+DebugSwitches
+{
+    SolverPerformance 1;
+}
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+// Kim 2016, Fig. 5a (bois, 149 kg/m2/h) : fin de la phase de propagation
+// (IPS, T0 franchit 200 C) vers t ~ 115 min ; fin d'essai (COS) ~ 250 min.
+// Cible 1 : 7200 s (120 min) = toute l'IPS (comparaison T0..T6, IFS, IR).
+// Cible 2 (optionnelle) : 15000 s (250 min) = COS complete.
+endTime         6000;
+
+deltaT          1e-4;
+
+writeControl    adjustableRunTime;
+
+// Reacteur 2.9x plus volumineux que le WBT et phenomene ~15x plus long :
+// 60 s (test99 : 5 s). purgeWrite 0 : tout est garde (~120 ecritures).
+writeInterval   60;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  17;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+// Criteres de pas de temps : IDENTIQUES a test99 (voir l'historique complet
+// dans gasifier_maillageReel_v8_wbtGeometry_test99_coldGrateEpsR/system/controlDict).
+maxCo      0.7;   // 2026-10-13 reprise apres NaN 1730 s (CONSTATS 21.17) ; avant : 1.0 ;   // 2026-10-05 : maxCo1 ADOPTE (test hrEndo_maxCo1 : t600 T4 1074 s contre 1069 s) ; cas jeff
+
+maxDi      10;
+
+maxRa      5;
+
+maxGa      1.0;   // 2026-09-30 : 0.3 -> 1.0 (critere echauffement gaz ~100 K/pas au lieu de 30) ; mesh5 bloque a dt 7e-5 par Ga. NUMERIQUE ; verifie sur 10 mm (reprise 600 s, comparaison t600 T3=910 s de run2c).
+
+maxUa      0.3;
+UaSmall    0.01;      // 2026-09-29 [m/s] plancher de vitesse du critere Ua (defaut solveur 1e-3). Vitesse superficielle d'entree Kim 149 kg/m2h ~0.035 m/s ; air sous la grille 0.2-2 mm/s oscillant (acoustique) -> Ua limitait dt a ~1e-5 s. NUMERIQUE, pas physique.
+
+functions
+{
+    #include "sondesNominales"   // 2026-10-12 sondes interpolees aux cotes nominales (CONSTATS 21.10)
+    #include "sondesAxe"   // 2026-10-13 agent oscillations
+
+    // Thermocouples K T0..T9 de Kim 2016 (sect. 2.2, p.2 ; Fig. 1) : sur
+    // l'axe, a partir du niveau de la plaque perforee (T0), pas de 50 mm
+    // (T9 = 450 mm au-dessus de la plaque). Plaque a z = 0.100 m ici.
+    // r = 0.002 m : premiere cellule contre l'axe (coin 5 deg). z decale de
+    // +0.5 mm pour ne jamais tomber exactement sur une face (les cotes
+    // 0.05 m coincident avec des faces pour les mailles 5/10 mm) : le
+    // thermocouple est ainsi toujours rattache a la cellule JUSTE AU-DESSUS
+    // de la cote nominale. En lit, le thermocouple voit un melange
+    // gaz/solide : T (gaz) et Ts (solide) sont enregistres tous les deux.
+    // Lit : T0 (plaque) .. T6 (sommet initial du lit, z=0.400) ;
+    // T7..T9 : ciel gazeux (freeboard).
+    probesKim_fluid
+    {
+        type            probes;
+        libs            ("libsampling.so");
+        region          fluidZone;
+        writeControl    runTime;
+        writeInterval   5;
+        fields          (T Ts O2 CO CO2 H2 CH4 H2O C6H5OH U p porosityF Ymoisture Yfuel Ychar Yash);   // C6H5OH (goudron) ajoute 2026-09-29
+        probeLocations
+        (
+            (0.002 0 0.1005)   // T0  plaque perforee (0 mm)
+            (0.002 0 0.1505)   // T1  50 mm
+            (0.002 0 0.2005)   // T2  100 mm
+            (0.002 0 0.2505)   // T3  150 mm
+            (0.002 0 0.3005)   // T4  200 mm
+            (0.002 0 0.3505)   // T5  250 mm
+            (0.002 0 0.3995)   // T6  300 mm = sommet du lit initial (cellule JUSTE SOUS la surface)
+            (0.002 0 0.4505)   // T7  350 mm (freeboard)
+            (0.002 0 0.5005)   // T8  400 mm (freeboard)
+            (0.002 0 0.5505)   // T9  450 mm (freeboard)
+            (0.002 0 0.0500)   // plenum (pression amont de la plaque)
+            (0.002 0 0.6950)   // sortie
+        );
+    }
+
+    // Refractaire : pas de mesure dans Kim 2016 ; sondes de diagnostic
+    // (mi-epaisseur du garnissage) au niveau de T1, T3, T5, T8.
+    probesKim_solid
+    {
+        type            probes;
+        libs            ("libsampling.so");
+        region          solidZone;
+        writeControl    runTime;
+        writeInterval   5;
+        fields          (T);
+        probeLocations
+        (
+            (0.175 0 0.1505)
+            (0.175 0 0.2505)
+            (0.175 0 0.3505)
+            (0.175 0 0.5005)
+        );
+    }
+
+    // Debits entree/sortie (bilan de masse ; controle de la CL massFlowRate).
+    massFlowIn
+    {
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        region          fluidZone;
+        writeControl    timeStep;
+        writeInterval   200;
+        regionType      patch;
+        name            inlet;
+        operation       sum;
+        fields          (phi);
+        writeFields     false;
+        log             true;
+    }
+    massFlowOut
+    {
+        $massFlowIn;
+        name            outlet;
+    }
+}
+
+// Options solveur lues dans ce controlDict (identiques a test99) :
+updateK         yes;
+
+ergunInertialEps yes;
+// Diametre de particule pour le terme inertiel d'Ergun (updateDf.H).
+// Granule de bois : cylindre 5 x 25 mm (Kim 2016, Table 1). Le diametre
+// equivalent retenu (volume, surface-volume, ...) est un choix de modele :
+// 2026-09-29 : d_sv = 6V/S du cylindre d 5 mm x L 25 mm (Kim Table 1) :
+//   V = 490.9 mm3, S = 432.0 mm2 -> d_sv = 6.82 mm (= psi*d_v = 0.697*9.79 mm).
+//   Ergun ecrit avec la surface specifique -> d_sv dans les deux termes
+//   (model_properties_woodpellet.md ligne 5 et sect. 2, DERIVE).
+ergunDp         0.00682;   // [m] d_sv, DERIVE de Kim 2016 Table 1
+
+// ************************************************************************* //

@@ -1,0 +1,4 @@
+E2 : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+débit d air x 0.99999999 (4.0633000000000002e-05 -> 4.063299959e-05)
+arrêt 420 s après le passage à 600 °C de la colonne 3
+endTime 6000

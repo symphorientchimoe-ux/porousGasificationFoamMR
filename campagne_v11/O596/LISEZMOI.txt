@@ -1,0 +1,3 @@
+O596 : débit 596 kg/m2h, couvercle non, départ base_596 à 60 s
+arrêt 420 s après le passage à 600 °C de la colonne 3
+endTime 4000

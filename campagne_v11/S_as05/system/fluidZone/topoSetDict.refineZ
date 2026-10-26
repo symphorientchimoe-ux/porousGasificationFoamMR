@@ -1,0 +1,6 @@
+FoamFile { version 2.0; format ascii; class dictionary; object topoSetDict; }
+// 2026-10-13 agent oscillations : rangees du lit (0.1 < z < 0.4) a raffiner en z (10 -> 5 mm)
+actions
+(
+    { name c0; type cellSet; action new; source boxToCell; sourceInfo { box (-1 -1 0.1) (1 1 0.4); } }
+);

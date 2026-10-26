@@ -1,0 +1,4 @@
+L596 : débit 596 kg/m2h, couvercle oui, départ base_596 à 60 s
+couvercle posé à 60 s (poser_couvercle.py)
+arrêt 420 s après le passage à 600 °C de la colonne 3
+endTime 6000

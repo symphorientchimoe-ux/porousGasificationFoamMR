@@ -1,0 +1,61 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      pyrolysisProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+active          true;
+
+heterogeneousPyrolysisModel  volPyrolysis;
+
+pyrolysisCoeffs
+{
+    // Tassement du lit (test73) : Yang et al. 2005 (Fuel 84:2026, eq. 7),
+    // shrinkA 0.8 et intervalle 20 s repris de test99. Le lit de Kim s'affaisse
+    // effectivement (masse restante 23.4 % a la fin de l'IPS, Table 2).
+    bedCollapse      on;
+    shrinkA          0.8;
+    collapseInterval 20;
+    bedZoneName      biomass_bed;
+
+    subintegrateHeatTransfer false;
+
+    // Allumage au kerosene au sommet du lit (Kim 2016, sect. 2.2 : "ignited at
+    // the top of the bed by kerosene" ; aucune autre donnee). Represente par
+    // l'allumeur maintenu de volPyrolysis (Ts force dans igniterZone pendant
+    // igniterDuration, cf. test56-99 : 850 K / 8 s pour le WBT).
+    // Temperature et duree : NON donnees par Kim -> placeholders. Indice
+    // experimental : Fig. 5a, T6 (sommet du lit) monte a ~750-800 C vers
+    // t ~ 15-20 min ; l'origine des temps de Kim n'est pas precisee.
+    igniterCellSet      igniterZone;
+    // 2026-09-29 : PARAMETRE DE CALAGE (allumage kerosene non documente par Kim).
+    //   Premiere estimation documentee : 900 K maintenus 60 s sur igniterZone.
+    //   Plan : ajuster (T, duree) pour que T6 atteigne 600 C a t = 17.6 min
+    //   a 149 kg/m2/h (data/experiment_setup.md sect. 6, Fig. 5a numerisee),
+    //   puis FIGER pour les autres debits.
+    igniterTemperature  1000;   // 2026-10-15 ref5 : modifie par lancer.sh (800 K jusqu a 60 s, puis 1000 K) ; // 2026-10-12 T800_cons_ign1000 (CONSTATS 21.12) : 800 -> 1000 K ; ancien :   // 2026-10-07 ignThin : 1 rangee a 700 K ne s'allume pas (60 et 180 s) -> 800 K, 60 s   // 2026-09-29 run2 : 900 K -> 700 K. Run1 (900 K) : Di Blasi k(900 K)=28 1/s -> devolatilisation de la zone allumeur en <0.1 s, Srho 2e4 kg/m3/s, rho gaz 3.5 (surpression), T gaz >3500 K a t=4.5e-4 s (JANAF). 700 K : k=0.13 1/s (5x le taux de l'allumeur foyer 850 K, cinetique foyer). Ts force = temperature MOYENNE du granule, pas celle de la flamme de kerosene. Reste PARAMETRE DE CALAGE (t600 T6 = 17.6 min).
+      // [K] PARAMETRE DE CALAGE (allumage kerosene non documente par Kim)
+    igniterDuration     600;   // 2026-10-12 T800_cons_ign300 (CONSTATS 21.11) : 60 -> 300 s, solveur _cons ; ancien : 60 s, PARAMETRE DE CALAGE
+
+    // Masse volumique de la cendre, DOIT etre egale a ashCoeffs.density.rho
+    // (solidThermophysicalProperties) -- plafond de porosite (volPyrolysis).
+    // 2026-09-29 : = ashCoeffs.density.rho (solidThermophysicalProperties) = 2162.
+    //   rho cendre absente de data/model_properties_woodpellet.md -> reprise du
+    //   cas biochar test105 (HYPOTHESE declaree, voir solidThermophysicalProperties).
+    ashDensity          2162;   // [kg/m3] = rho ash, HYPOTHESE declaree (valeur test105)
+}
+
+infoOutput      true;
+
+// ************************************************************************* //

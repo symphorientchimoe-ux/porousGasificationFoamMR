@@ -1,0 +1,3 @@
+M25 : débit 149_M25 kg/m2h, couvercle non, départ base_149_M25 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 5
+endTime 6000

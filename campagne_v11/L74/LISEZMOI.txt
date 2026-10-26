@@ -1,0 +1,4 @@
+L74 : débit 74 kg/m2h, couvercle oui, départ base_74 à 60 s
+couvercle posé à 60 s (poser_couvercle.py)
+arrêt 420 s après le passage à 600 °C de la colonne 3
+endTime 9000

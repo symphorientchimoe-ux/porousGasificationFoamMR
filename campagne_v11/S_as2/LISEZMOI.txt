@@ -1,0 +1,5 @@
+S_as2 : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+constant/fluidZone/radiationProperties : 90.9 -> 181.8
+constant/fluidZone/radiationProperties : 246 -> 492
+arrêt 60 s après le passage à 600 °C de la colonne 4
+endTime 6000
