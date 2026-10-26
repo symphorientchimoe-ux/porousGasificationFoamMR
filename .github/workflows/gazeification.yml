@@ -1,0 +1,197 @@
+# Calculs porousGasificationFoamMR (OpenFOAM 8) sur les runners gratuits de GitHub.
+# Dépôt public : runners 4 vCPU / 16 Go, minutes illimitées, 6 h max par job, 20 jobs à la fois pour le compte.
+# Un job « compilation » construit le solveur (mis en cache tant que les sources ne changent pas).
+# Chaque élément de la matrice « cas » tourne dans son propre job ; « a+b » fait tourner deux cas en même temps
+# sur la même machine (2 processus chacun sur 4 vCPU). Un job s'arrête proprement avant 6 h, sauvegarde ses cas
+# dans un artefact, et le job « suite » relance le workflow pour les cas non terminés.
+name: gazeification
+
+on:
+  workflow_dispatch:
+    inputs:
+      cas:
+        description: 'Liste JSON des cas (dossiers du dépôt ; « a+b » = deux cas sur la même machine)'
+        default: '["tutorials/kimReactor149_restart"]'
+      ref:
+        description: 'Branche, étiquette ou commit des sources du solveur (vide = celui du workflow)'
+        default: ''
+      solveur:
+        description: 'Nom du solveur'
+        default: 'porousGasificationFoamMR'
+      np:
+        description: 'Processus MPI par cas (le découpage existant du cas prime)'
+        default: '2'
+      budget:
+        description: 'Durée de calcul par passage [s] (< 6 h, marge pour écrire et archiver)'
+        default: '19800'
+      reprise_run_id:
+        description: 'Identifiant du run précédent à reprendre (vide = nouveau calcul)'
+        default: ''
+      passe:
+        description: 'Numéro de passage (géré automatiquement)'
+        default: '1'
+      passes_max:
+        description: 'Nombre maximal de passages enchaînés'
+        default: '40'
+      etiquette:
+        description: 'Suffixe des noms d artefacts pour distinguer une série (vide = aucun)'
+        default: ''
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  IMAGE: openfoam/openfoam8-paraview56
+  SUFFIXE: ${{ inputs.etiquette != '' && format('-{0}', inputs.etiquette) || '' }}
+
+jobs:
+  compilation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Cache de la compilation
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: pgf-of8-${{ hashFiles('Allwmake', 'src/**', 'applications/**') }}
+
+      - name: Compiler (conteneur OpenFOAM 8)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull -q "$IMAGE"
+          docker run --rm --user root --entrypoint /bin/bash -v "$PWD":/w -w /w "$IMAGE" -c '
+            command -v g++ > /dev/null || (apt-get update -qq && apt-get install -y -qq build-essential flex > /dev/null)
+            source /opt/openfoam8/etc/bashrc
+            export FOAM_USER_APPBIN=/w/build/bin FOAM_USER_LIBBIN=/w/build/lib
+            export LD_LIBRARY_PATH=$FOAM_USER_LIBBIN:$LD_LIBRARY_PATH
+            ./Allwmake -j > /w/log.Allwmake 2>&1; rc=$?
+            tail -5 /w/log.Allwmake
+            chmod -R a+rwX /w
+            exit $rc'
+
+      - name: Version compilée
+        run: |
+          ls -l build/bin build/lib
+          echo "sources : $(git rev-parse HEAD) (cache : ${{ steps.cache.outputs.cache-hit }})" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: solveur${{ env.SUFFIXE }}-passe${{ inputs.passe }}
+          path: build
+          retention-days: 3
+
+  calcul:
+    needs: compilation
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        cas: ${{ fromJSON(inputs.cas) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nom de l élément
+        id: nom
+        run: echo "slug=$(echo '${{ matrix.cas }}' | tr '/+' '_-')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: solveur${{ env.SUFFIXE }}-passe${{ inputs.passe }}
+          path: build
+
+      - name: Récupérer les cas du passage précédent
+        if: inputs.reprise_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: cas-${{ steps.nom.outputs.slug }}${{ env.SUFFIXE }}
+          run-id: ${{ inputs.reprise_run_id }}
+          github-token: ${{ github.token }}
+          path: reprise
+
+      - name: Préparer les cas
+        run: |
+          mkdir -p runs sortie
+          if [ -d reprise ]; then
+            for a in reprise/*.tar.gz; do tar xzf "$a" -C runs; done
+          else
+            IFS='+' read -ra LISTE <<< '${{ matrix.cas }}'
+            for c in "${LISTE[@]}"; do cp -r "$c" "runs/$(echo "$c" | tr '/' '_')"; done
+          fi
+          ls runs
+
+      - name: Calcul (conteneur OpenFOAM 8)
+        run: |
+          docker pull -q "$IMAGE"
+          docker run --rm --user root --entrypoint /bin/bash -v "$PWD":/w -w /w -e PGF_BUILD=/w/build "$IMAGE" -c '
+            command -v python3 > /dev/null || (apt-get update -qq && apt-get install -y -qq python3 > /dev/null)
+            chmod +x build/bin/*
+            for d in runs/*/; do
+              n=$(basename "$d")
+              bash calcul_distant/lancer_cas.sh "$d" --np ${{ inputs.np }} --budget ${{ inputs.budget }} \
+                --solveur ${{ inputs.solveur }} --archive "/w/sortie/$n.tar.gz" > "/w/sortie/$n.txt" 2>&1 &
+            done
+            wait
+            chmod -R a+rwX /w'
+          for f in sortie/*.txt; do echo "== $f"; tail -15 "$f"; done
+          { echo "### ${{ matrix.cas }} (passage ${{ inputs.passe }})"; for d in runs/*/; do echo "**$(basename $d)** : $(cat $d/ETAT 2>/dev/null || echo absent)"; echo '```'; cat $d/bilan.txt 2>/dev/null; echo '```'; done; } >> "$GITHUB_STEP_SUMMARY"
+          # état de l'élément : erreur si un cas a planté, a_reprendre si un cas n'est pas fini, sinon termine
+          etats=$(cat runs/*/ETAT 2>/dev/null)
+          if echo "$etats" | grep -q erreur; then e=erreur; elif echo "$etats" | grep -q a_reprendre; then e=a_reprendre; else e=termine; fi
+          echo "$e" > ETAT
+          mkdir -p journaux; for d in runs/*/; do n=$(basename $d); cp $d/bilan.txt journaux/$n.bilan.txt 2>/dev/null; cp $d/ETAT journaux/$n.ETAT 2>/dev/null; l=$(ls -1 $d/log.run.* 2>/dev/null | sort -t. -k3 -n | tail -1); [ -n "$l" ] && tail -200 "$l" > journaux/$n.fin_journal.txt; done
+
+      - name: Sauver les cas pour la reprise
+        uses: actions/upload-artifact@v4
+        with:
+          name: cas-${{ steps.nom.outputs.slug }}${{ env.SUFFIXE }}
+          path: sortie/*.tar.gz
+          retention-days: 7
+          compression-level: 0
+
+      - name: Sauver le bilan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilan-${{ steps.nom.outputs.slug }}${{ env.SUFFIXE }}-passe${{ inputs.passe }}
+          path: |
+            ETAT
+            journaux/
+            sortie/*.txt
+          retention-days: 90
+
+  suite:
+    needs: calcul
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bilan-*${{ env.SUFFIXE }}-passe${{ inputs.passe }}
+          path: bilans
+      - name: Relancer les éléments non terminés
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          restants=()
+          for c in $(echo '${{ inputs.cas }}' | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)))'); do
+            slug=$(echo "$c" | tr '/+' '_-')
+            etat=$(cat "bilans/bilan-${slug}${SUFFIXE}-passe${{ inputs.passe }}/ETAT" 2>/dev/null || echo absent)
+            echo "$c : $etat"
+            [ "$etat" = "a_reprendre" ] && restants+=("\"$c\"")
+          done
+          if [ ${#restants[@]} -eq 0 ]; then echo "Rien à relancer."; exit 0; fi
+          passe=$(( ${{ inputs.passe }} + 1 ))
+          if [ "$passe" -gt "${{ inputs.passes_max }}" ]; then echo "Nombre maximal de passages atteint."; exit 0; fi
+          liste="[$(IFS=,; echo "${restants[*]}")]"
+          echo "Relance du passage $passe pour $liste"
+          gh workflow run gazeification.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
+            -f cas="$liste" -f ref="${{ inputs.ref }}" -f solveur="${{ inputs.solveur }}" -f np="${{ inputs.np }}" \
+            -f budget="${{ inputs.budget }}" -f reprise_run_id="${{ github.run_id }}" -f passe="$passe" \
+            -f passes_max="${{ inputs.passes_max }}" -f etiquette="${{ inputs.etiquette }}"
