@@ -6,8 +6,15 @@
 # En relançant la même commande sur le même dossier, il repart du dernier temps écrit.
 #
 # Usage :
-#   lancer_cas.sh DOSSIER_CAS [--np 2] [--budget 19800] [--solveur porousGasificationFoamMR]
-#                 [--archive sortie.tar.gz]
+#   lancer_cas.sh DOSSIER_CAS [--np 2] [--budget 15000] [--budget-max 19800] [--ecriture DT]
+#                 [--solveur porousGasificationFoamMR] [--archive sortie.tar.gz]
+#
+# Au bout de --budget s d'horloge, le calcul s'arrête au PROCHAIN instant d'écriture prévu (nextWrite) :
+# OpenFOAM 8 compte les instants d'écriture (champs et sondes) depuis le temps de démarrage, si bien
+# qu'un arrêt à un instant quelconque décalerait toutes les écritures des passages suivants (et
+# endTime ne serait plus écrit). Filet de sécurité : arrêt immédiat avec écriture à --budget-max s.
+# --ecriture DT fixe writeInterval (s simulées) : à choisir pour qu'un intervalle tienne dans
+# budget-max - budget.
 #
 # Arrêt sur jalon (facultatif) : un fichier DOSSIER_CAS/ARRET contenant « colonne délai »
 # arrête le calcul « délai » secondes simulées après le premier passage à 873,15 K (600 °C)
@@ -29,11 +36,13 @@ if [ -z "${FOAM_BASHRC:-}" ]; then
 fi
 
 CASE="$1"; shift
-NP=2; BUDGET=19800; SOLVEUR=porousGasificationFoamMR; ARCHIVE=""
+NP=2; BUDGET=15000; BUDGET_MAX=19800; ECRITURE=""; SOLVEUR=porousGasificationFoamMR; ARCHIVE=""
 while [ $# -gt 0 ]; do
     case "$1" in
         --np) NP="$2"; shift 2 ;;
         --budget) BUDGET="$2"; shift 2 ;;
+        --budget-max) BUDGET_MAX="$2"; shift 2 ;;
+        --ecriture) ECRITURE="$2"; shift 2 ;;
         --solveur) SOLVEUR="$2"; shift 2 ;;
         --archive) ARCHIVE="$2"; shift 2 ;;
         *) echo "option inconnue $1"; exit 2 ;;
@@ -73,10 +82,15 @@ fi
 foamDictionary system/controlDict -entry writePrecision -set 17 > /dev/null
 foamDictionary system/controlDict -entry timePrecision -set 12 > /dev/null
 foamDictionary system/controlDict -entry stopAt -set endTime > /dev/null
-# arrêt propre au bout de BUDGET s d'horloge
-foamDictionary system/controlDict -entry functions/stopAtClock -remove > /dev/null 2>&1
+[ -n "$ECRITURE" ] && foamDictionary system/controlDict -entry writeInterval -set "$ECRITURE" > /dev/null
+# arrêt propre : au prochain instant d'écriture après BUDGET s d'horloge, au plus tard à BUDGET_MAX s
+for fo in stopAtClock stopAtClockMax; do
+    foamDictionary system/controlDict -entry functions/$fo -remove > /dev/null 2>&1
+done
 foamDictionary system/controlDict -entry functions/stopAtClock -add \
-    "{ type stopAtClockTime; libs (\"libutilityFunctionObjects.so\"); stopTime $BUDGET; action writeNow; }" > /dev/null
+    "{ type stopAtClockTime; libs (\"libutilityFunctionObjects.so\"); stopTime $BUDGET; action nextWrite; }" > /dev/null
+foamDictionary system/controlDict -entry functions/stopAtClockMax -add \
+    "{ type stopAtClockTime; libs (\"libutilityFunctionObjects.so\"); stopTime $BUDGET_MAX; action writeNow; }" > /dev/null
 
 n=1; while [ -e "log.run.$n" ]; do n=$((n+1)); done
 LOG="log.run.$n"

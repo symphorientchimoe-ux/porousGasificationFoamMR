@@ -15,15 +15,18 @@ on:
       ref:
         description: 'Branche, étiquette ou commit des sources du solveur (vide = celui du workflow)'
         default: ''
-      solveur:
-        description: 'Nom du solveur'
-        default: 'porousGasificationFoamMR'
       np:
         description: 'Processus MPI par cas (le découpage existant du cas prime)'
         default: '2'
       budget:
-        description: 'Durée de calcul par passage [s] (< 6 h, marge pour écrire et archiver)'
+        description: 'Horloge [s] après laquelle le passage s arrête au prochain instant d écriture'
+        default: '15000'
+      budget_max:
+        description: 'Horloge [s] d arrêt immédiat avec écriture (filet de sécurité, < 6 h)'
         default: '19800'
+      ecriture:
+        description: 'writeInterval imposé [s simulées] (vide = celui du cas)'
+        default: ''
       reprise_run_id:
         description: 'Identifiant du run précédent à reprendre (vide = nouveau calcul)'
         default: ''
@@ -135,7 +138,7 @@ jobs:
             for d in runs/*/; do
               n=$(basename "$d")
               bash calcul_distant/lancer_cas.sh "$d" --np ${{ inputs.np }} --budget ${{ inputs.budget }} \
-                --solveur ${{ inputs.solveur }} --archive "/w/sortie/$n.tar.gz" > "/w/sortie/$n.txt" 2>&1 &
+                --budget-max ${{ inputs.budget_max }} ${{ inputs.ecriture != '' && format('--ecriture {0}', inputs.ecriture) || '' }} --archive "/w/sortie/$n.tar.gz" > "/w/sortie/$n.txt" 2>&1 &
             done
             wait
             chmod -R a+rwX /w'
@@ -192,6 +195,6 @@ jobs:
           liste="[$(IFS=,; echo "${restants[*]}")]"
           echo "Relance du passage $passe pour $liste"
           gh workflow run gazeification.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
-            -f cas="$liste" -f ref="${{ inputs.ref }}" -f solveur="${{ inputs.solveur }}" -f np="${{ inputs.np }}" \
-            -f budget="${{ inputs.budget }}" -f reprise_run_id="${{ github.run_id }}" -f passe="$passe" \
+            -f cas="$liste" -f ref="${{ inputs.ref }}" -f np="${{ inputs.np }}" \
+            -f budget="${{ inputs.budget }}" -f budget_max="${{ inputs.budget_max }}" -f ecriture="${{ inputs.ecriture }}" -f reprise_run_id="${{ github.run_id }}" -f passe="$passe" \
             -f passes_max="${{ inputs.passes_max }}" -f etiquette="${{ inputs.etiquette }}"
