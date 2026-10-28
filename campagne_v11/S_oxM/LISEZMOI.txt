@@ -1,0 +1,4 @@
+S_oxM : debit 149 kg/m2h, couvercle non, depart base_149 a 60 s (copie de R149O)
+constant/fluidZone/chemistryProperties : oxydation du charbon de Mehrabian 2014 (C+O2 : 5.61e9/19600 -> 2204/9000 ; voie CO : 1.4025e13/25849 -> 6031/12390)
+arret 60 s apres le passage a 600 C de la colonne 4
+endTime 6000

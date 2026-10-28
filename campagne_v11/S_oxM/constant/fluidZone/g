@@ -1,0 +1,27 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      binary;
+    class       uniformDimensionedVectorField;
+    location    "constant";
+    object      g;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -2 0 0 0 0];
+// Corrige 2026-09-18 (v8), voir constant/g pour le detail complet.
+// Test 21 (2026-09-21) : reintegration etape 4/4, gravite + CL air
+// naturel ensemble. Voir constant/g.
+// Test 23 (2026-09-22) : tirage naturel seul, gravite remise a 0. PASS.
+// Configuration finale verrouillee : gravite reelle (-9.81), voir
+// constant/g pour le detail complet de l'isolation.
+value           ( 0 0 -9.81);
+
+// ************************************************************************* //
