@@ -1,0 +1,4 @@
+M10 : débit 149_M10 kg/m2h, couvercle non, départ base_149_M10 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 5
+endTime 6000
+M10_diag : diagnostic de l allumage (M10 ne s allume pas en v1.1), 60 -> 400 s, sondes serrees au sommet du lit (probesDiagSommet, 1 s). Lance le 2026-10-28.

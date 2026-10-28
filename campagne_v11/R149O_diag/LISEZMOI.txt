@@ -1,0 +1,3 @@
+R149O : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+endTime 15000
+R149O_diag : diagnostic de l allumage (M10 ne s allume pas en v1.1), 60 -> 400 s, sondes serrees au sommet du lit (probesDiagSommet, 1 s). Lance le 2026-10-28.
