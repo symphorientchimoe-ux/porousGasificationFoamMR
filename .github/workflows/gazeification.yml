@@ -100,6 +100,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 2026-10-28 : ~14 Go libres seulement sur ubuntu-latest ; les archives de reprise font plusieurs Go par paire.
+      - name: Libérer de la place disque
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          df -h . | tail -1
+
       - name: Nom de l élément
         id: nom
         run: echo "slug=$(echo '${{ matrix.cas }}' | tr '/+' '_-')" >> "$GITHUB_OUTPUT"
@@ -122,7 +128,15 @@ jobs:
         run: |
           mkdir -p runs sortie
           if [ -d reprise ]; then
-            for a in reprise/*.tar.gz; do tar xzf "$a" -C runs; done
+            # 2026-10-28 : les journaux des passages précédents (bruts avant cette date, ~1 Go chacun) sont filtrés
+            # à l'extraction (logfilter.awk, un pas sur 20), et chaque archive est effacée dès qu'elle est extraite.
+            for a in reprise/*.tar.gz; do
+              tar xzf "$a" -C runs --wildcards --exclude='*/log.run.*'
+              tar xzf "$a" -C runs --wildcards '*/log.run.*' \
+                --to-command='awk -v N=20 -f "$GITHUB_WORKSPACE/calcul_distant/logfilter.awk" > "$GITHUB_WORKSPACE/runs/$TAR_FILENAME"' || true
+              rm -f "$a"
+            done
+            df -h . | tail -1
           else
             IFS='+' read -ra LISTE <<< '${{ matrix.cas }}'
             for c in "${LISTE[@]}"; do cp -r "$c" "runs/$(echo "$c" | tr '/' '_')"; done

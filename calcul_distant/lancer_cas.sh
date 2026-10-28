@@ -113,11 +113,15 @@ echo ">> $SOLVEUR sur $NP processus, budget ${BUDGET} s, journal $LOG"
 t0=$(date +%s)
 if [ "$NP" -gt 1 ]; then
     # --oversubscribe : les runners annoncent des vCPU (hyperthreads) que MPI ne compte pas comme cœurs
-    mpirun --oversubscribe --bind-to none -np "$NP" "$SOLVEUR" -parallel > "$LOG" 2>&1
+    mpirun --oversubscribe --bind-to none -np "$NP" "$SOLVEUR" -parallel 2>&1 | awk -v N=20 -f "$HERE/logfilter.awk" > "$LOG"
+    rc=${PIPESTATUS[0]}
 else
-    "$SOLVEUR" > "$LOG" 2>&1
+    "$SOLVEUR" 2>&1 | awk -v N=20 -f "$HERE/logfilter.awk" > "$LOG"
+    rc=${PIPESTATUS[0]}
 fi
-rc=$?
+# 2026-10-28 : journal filtré (un pas sur 20 + toutes les alertes, logfilter.awk comme sur la station).
+# Le journal brut (~4 ko par pas, ~1 Go par passage) s'accumulait dans l'archive de reprise : 3-4 Go par cas
+# à la passe 6, et l'archive S_hv tronquée à la passe 5 (« Unexpected EOF »).
 [ -n "$WATCH" ] && kill "$WATCH" 2> /dev/null
 echo "$(( $(date +%s) - t0 ))" > duree_passage.txt
 echo ">> $SOLVEUR terminé (code $rc) en $(cat duree_passage.txt) s"

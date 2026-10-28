@@ -1,0 +1,6 @@
+S_edmInf : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+constant/fluidZone/combustionProperties : 4 -> 1000000
+arrêt 60 s après le passage à 600 °C de la colonne 4
+endTime 6000
+S_edmInf_ua3 : comme S_edmInf (A EDM 1e6, chimie cinetique seule), maxUa 0.3 -> 3
+(S_edmInf bloque a 123,5 s, dt ~1e-8 s limite par Ua). Lance le 2026-10-28, etiquette v11d.
