@@ -1,0 +1,24 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Kim 2016 (2026-09-29) : fichier de NIVEAU CAS, meme raison que
+// constant/chemistryProperties (test103 portait des copies racine). Inclut le fichier de
+// region, qui inclut lui-meme fluidZone/thermo.compressibleGas (chemin relatif au
+// fichier incluant) -> liste d'especes et thermo identiques par construction.
+
+#include "fluidZone/thermophysicalProperties"
+
+// ************************************************************************* //

@@ -1,0 +1,4 @@
+S_wiOff : debit 149 kg/m2h, couvercle non, depart base_149 a 60 s (copie de R149O)
+constant/fluidZone/radiationProperties : boundaryWhereIs no (correction whereIs du P1 coupee, seul changement) ; question 3 du rapport d expertise
+arret 60 s apres le passage a 600 C de la colonne 4
+endTime 15000
