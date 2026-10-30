@@ -1,0 +1,6 @@
+S_dryC : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+constant/fluidZone/chemistryProperties : 1e4 -> 5.13e+10
+constant/fluidZone/chemistryProperties : 6000 -> 10585
+constant/fluidZone/chemistryProperties : 373 -> 300
+arrêt 60 s après le passage à 600 °C de la colonne 4
+endTime 6000

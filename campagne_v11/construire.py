@@ -51,6 +51,12 @@ CAS = {
     'S_edmInf': (149, False, [(CB, r'\n\s*A\s+', 1e6 / 4)], (4, 60), 6000),             # A = 1e6 : chimie cinétique seule
     'S_sa06': (149, False, [(PY, r'\n\s*shrinkA\s+', 0.6 / 0.8)], (4, 60), 6000),
     'S_sa10': (149, False, [(PY, r'\n\s*shrinkA\s+', 1.0 / 0.8)], (4, 60), 6000),
+    # séchage (article 2, chantier 3, 30/10) : loi actuelle (1e4, 6000 K, seuil 373 K) contre Chan, Kelbon & Krieger
+    # 1985 (Fuel 64:1505 ; A 5,13e10 1/s, E 88 kJ/mol -> Ta 10585 K, sans seuil -> 300 K ; valeurs à vérifier sur le PDF)
+    # et contre un séchage 100 fois plus rapide (limite « thermique » : l'eau part dès 373 K)
+    'S_dryC': (149, False, [(CH, r'\n\s*\((?=1e4 6000 373)', 5.13e6), (CH, r'\n\s*\(5\.13e\+10\s+', 10585 / 6000),
+                            (CH, r'\n\s*\(5\.13e\+10\s+10585\s+', 300 / 373)], (4, 60), 6000),
+    'S_dry100': (149, False, [(CH, r'\n\s*\((?=1e4 6000 373)', 100.0)], (4, 60), 6000),
     # maillage (GCI, point M8) : 2,5 et 10 mm, état v1.1 à 60 s transféré par mapFields (mapNearest), arrêt 60 s après T3
     'M25':    ('149_M25', False, [], (5, 60), 6000),
     'M10':    ('149_M10', False, [], (5, 60), 6000),

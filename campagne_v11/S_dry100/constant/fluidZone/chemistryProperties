@@ -1,0 +1,371 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      chemistryProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// v5 : mecanisme solide densifie, historique diagnostic complet dans
+// SUIVI_MAILLAGEREEL_V5.md -- resume : extinction initiale tracee a des
+// valeurs de cinetique de sechage perimees (portees par erreur depuis un
+// essai deja rejete dans reint/), corrigees (A=1e4, Ta=6000, Tcrit=373).
+// Une fois corrige, combustion auto-entretenue stable et confirmee sur
+// ~4250s simulees (5 reactions : sechage+devolatilisation+oxydation
+// complete+Boudouard+gaz-a-l'eau, oxydation partielle encore desactivee),
+// boite d'amorcage 1.5cm, Ts=T=1000K, h/SAV=32/72.
+//
+// v6 (2026-09-10) : oxydation partielle reactivee EN MEME TEMPS que la
+// cinetique gaz homogene (reactions{} ci-dessous) -- les deux etaient
+// deliberement differees ensemble depuis le debut (l'oxydation partielle
+// perd jusqu'a 72% de l'energie de combustion du char en CO tant que ce
+// CO n'est jamais brule en phase gaz, cf commentaire historique
+// ci-dessous). reint/SUIVI_REINTRODUCTION2.md documente que h/SAV=32/72
+// cause une divergence numerique une fois la combustion gaz active (leur
+// config validee revient a 8/468, voir constant/heatTransferProperties)
+// -- sur demande explicite de l'utilisateur, ON RESTE D'ABORD SUR 32/72
+// pour ce premier test, observe directement plutot que revert
+// preventivement. Combinaison oxydation partielle + cinetique gaz jamais
+// testee ensemble dans reint/ non plus (recherche verifiee) -- terrain
+// nouveau, pas la reprise d'une config deja validee.
+//
+// BUG DE PORTAGE CORRIGE : la cinetique gaz avait d'abord ete ecrite dans
+// constant/reactions (format liste, type "irreversibleArrheniusReaction")
+// -- FOAM FATAL IO ERROR "keyword reactions is undefined in dictionary
+// .../chemistryProperties". Le lecteur de chimie gaz standard
+// (BasicChemistryModel/psiReactionThermo) cherche en fait un sous-
+// dictionnaire "reactions{}" ICI, dans chemistryProperties -- pas dans
+// constant/reactions (qui ne sert que pour species/thermo). Format
+// correct verifie sur un tutoriel OpenFOAM-8 standard (reactingFoam/
+// laminar/counterFlowFlame2D) : dictionnaire a accolades, entrees
+// nommees, type "irreversibleArrhenius" (sans suffixe "Reaction" --
+// different du type solide "irreversibleSolidArrheniusHeterogeneousReaction"
+// qui est un enregistrement distinct/maison, cf makeReactions.C). Voir
+// SUIVI_MAILLAGEREEL_V6.md.
+
+
+// =========================================================================
+// Kim 2016 (validation_Kim2016/case_woodPellet_149), 2026-09-29 :
+// PARTIE GAZ (reactions CO/H2/CH4, laminarEDM, tolerances ODE, gasAlphaTemp)
+// = test99 A L'IDENTIQUE (cinetiques de combustion gazeuse, independantes du
+// combustible solide). PARTIE SOLIDE (solidReactions, en fin de fichier) :
+// devolatilisation et reactivite du char DEPENDENT du combustible -> PLACEHOLDERS
+// a remplir depuis ../data/model_properties_woodpellet.md.
+// 2026-09-29 (schema pyrolyse bois, ../data/pyrolysis_scheme_wood.md) : placeholders
+// solides REMPLIS ; goudron C6H5OH ajoute (liste 'species', reaction TARoxidation,
+// laminarEDM). Le fichier de NIVEAU CAS ../chemistryProperties (la ou le projet a
+// constate la lecture des reactions gaz et de odeCoeffs, cf. test40) fait
+// '#include "fluidZone/chemistryProperties"' : editer UNIQUEMENT ce fichier-ci.
+// =========================================================================
+
+chemistry           on;
+
+chemistryType
+{
+    solver            ode;
+}
+
+// v6 (2026-09-10) : cinetique gaz homogene. Valeurs (A, beta, Ta) portees
+// depuis reint/constant/reactions (PAS depuis le jeu de parametres plus
+// ancien/different qui trainait dans une version anterieure de ce
+// fichier, jamais reference comme valide dans SUIVI_REINTRODUCTION2.md --
+// meme piege que le sechage v5, verifie cette fois avant de porter). A/Ta
+// non modifies lors de la validation de reint/ (etape 6). Coefficients
+// d'ordre fractionnaire du CH4 (-0.3, 1.3 dans reint/) omis -- pas de
+// mot-cle equivalent identifie pour ArrheniusReactionRate standard, ordre
+// stoechiometrique retenu comme simplification raisonnable.
+// v6 : test d'isolation 1 -- oxydation partielle seule (reactions{} ici
+// vide), h/SAV=32/72 -- CONFIRME PROPRE (t=2.3s, aucun warning "too much",
+// oxydation partielle disculpee comme cause du crash).
+// Test d'isolation 2 (2026-09-10) : combustion gaz REACTIVEE, oxydation
+// partielle desactivee (voir plus bas) -- objectif inverse du test 1,
+// isoler si la combustion gaz seule reproduit le crash. h/SAV toujours a
+// 32/72 (base v5). Voir SUIVI_MAILLAGEREEL_V6.md.
+// Test 39 (2026-09-24) : reprend A/100 (test32/37/38) + relTol serre
+// (test38), AJOUTE la correction specieTransferProperties (SAV=468
+// perime -> 63.5, valeur calibree -- voir ce fichier). Depart FRAIS
+// (t=0), pas un redemarrage -- lecon de test38 (redemarrer masque l'etat
+// deja avance du phenomene etudie).
+reactions
+{
+    COoxidation
+    {
+        // Test 80 (2026-09-27), hypothese H8 : etait "CO + 0.5O2 = CO2", A 1e10, Ta 19980
+        // (source non retrouvee ; a 843 K, CO 3.9% et O2 13% coexistaient sans bruler en H1).
+        // Remplace par Meng et al. 2018 (Energy&Fuels) R2 = Khodaei et al. 2015 (Energy)
+        // eq.103 (meme ref [199] que H2) :
+        //   R_CO = 2.239e12 exp(-1.702e8/(R T)) [CO][O2]^0.25[H2O]^0.5   (SI, kmol, J/kmol)
+        // Ta = 1.702e8/8314.5 = 20470 K. H2O catalyseur : ordre 0.5, present des deux cotes
+        // (bilan nul) ; ordre 0.25 en O2.
+        type     irreversibleBoundedArrhenius;
+        reaction "CO + 0.5O2^0.25 + H2O^0.5 = CO2 + H2O";
+        A        2.239e12;
+        beta     0;
+        Ta       20470;
+    }
+    H2oxidation
+    {
+        // Test 56 (2026-09-25) : couple A/Ta de la source, ordres de la
+        // source. Meng et al. 2018 (Energy&Fuels) eq. R1 = Khodaei et al.
+        // 2015 (Energy) eq. 102, tous deux citant leur ref [199] :
+        //   R_H2 = 9.87e8 exp(-3.1e7/(R T)) [H2][O2]   (SI, kmol, J/kmol)
+        // Ta = 3.1e7/8314.5 = 3728.4 K. Ordre 1 en O2 (pas 0.5 stoech.) :
+        // "0.5O2^1". A en m3/kmol/s, directement en unites OpenFOAM.
+        type     irreversibleBoundedArrhenius;
+        reaction "H2 + 0.5O2^1 = H2O";
+        A        9.87e8;
+        beta     0;
+        Ta       3728.4;
+    }
+    CH4oxidation
+    {
+        // Test 82 (2026-09-27), hypothese H9 : etait "CH4 + 2O2 = CO2 + 2H2O", A 8.3e5,
+        // Ta 15000 (source non retrouvee). Remplace par Meng et al. 2018 (Energy&Fuels)
+        // eq.51 + R3 = Khodaei et al. 2015 (Energy) eq.101 (meme ref [199] que H2 et CO) :
+        //   CH4 + 0.5 O2 -> CO + 2 H2 ,  R = 5.012e11 exp(-2e8/(R T)) [CH4]^0.7 [O2]^0.8
+        // (SI, kmol, J/kmol) ; Ta = 2e8/8314.5 = 24054 K. Le CO et H2 formes brulent via
+        // COoxidation / H2oxidation (deux etapes, comme dans la source).
+        type     irreversibleBoundedArrhenius;
+        reaction "CH4^0.7 + 0.5O2^0.8 = CO + 2H2";
+        A        5.012e11;
+        beta     0;
+        Ta       24054;
+    }
+    TARoxidation
+    {
+        // Kim 2016 (2026-09-29, schema pyrolyse bois, ../data/pyrolysis_scheme_wood.md sect. 4).
+        // Goudron = espece unique C6H5OH (phenol, thermo Burcat de $FOAM_ETC/thermoData).
+        // Cinetique : Bryden K.M. & Ragland K.W. (1996) Energy Fuels 10:269-275, pour un
+        // goudron CH1.522O0.0228 (M = 13.91 g/mol), telle que tabulee par Di Blasi C. (2000)
+        // Chem. Eng. Sci. 55:2931, Tableau 2 eq. (20) et Tableau 4 (TEXTE INTEGRAL LU) :
+        //   R = A T exp(-E/(R T)) C_tar^0.5 C_O2 ,  A = 9.2e6 (m3/mol)^0.5/(s K), E = 80 kJ/mol
+        // Transposition au phenol (DERIVEE, meme vitesse MASSIQUE de goudron a fraction
+        // massique egale) : A_ph = A sqrt(13.91/94.114) = 3.537e6 (mol) ;
+        // unites OpenFOAM (kmol) : A_OF = A_ph sqrt(1000) = 1.1185e8 ; beta = 1 (facteur T) ;
+        // Ta = 80000/8.314462 = 9621.7 K. Deux etapes comme Bryden & Ragland : goudron -> CO + H2O,
+        // le CO brule ensuite par COoxidation. Stoechiometrie C6H6O + 4 O2 = 6 CO + 3 H2O
+        // (bilan elementaire et massique exacts : 222.106 = 222.106 g/mol).
+        type     irreversibleBoundedArrhenius;
+        reaction "C6H5OH^0.5 + 4O2^1 = 6CO + 3H2O";
+        A        1.1185e8;
+        beta     1;
+        Ta       9621.7;
+    }
+    // Craquage thermique du goudron : NON INCLUS dans le schema de base (decision
+    // utilisateur, voir ../data/pyrolysis_scheme_wood.md sect. 4.3). Cinetique disponible
+    // (Liden, Berruti & Scott 1988 via Di Blasi 2000 Tab. 4 : A = 4.28e6 1/s, E = 107 kJ/mol,
+    // dh = +42 kJ/kg) mais le phenol ne peut PAS se craquer en CO/CO2/CH4/H2 seuls avec
+    // conservation des elements (C/O = 6) : il faudrait une espece suie/char gazeux ou un
+    // reformage a la vapeur (C6H6O + 5 H2O = 6 CO + 8 H2) dont la cinetique n'est pas sourcee.
+}
+
+solidChemistryType
+{
+    solver              solidOde;
+    method              ODESolidHeterogeneousChemistryModel;
+    solidThermoType     const<constRad<constThermo<constRho>>>;
+}
+
+chemistrySolver     ode;
+
+solidChemistrySolver	solidOde;
+
+initialChemicalTimeStep 1e-5;
+
+// Fix (2026-09-10) : gasChemistryTimeStepControl n'etait lu nulle part dans
+// la branche transitoire du solveur (updateChemistryTimeStep.H ne bornait
+// deltaT que sur la chimie solide) -- root cause du SIGFPE de la chimie gaz
+// (kf() diverge des le 1er pas, dt non borne par la raideur Arrhenius du
+// gaz). Cable maintenant (voir updateChemistryTimeStep.H, porte par
+// gasChemistryTimeStepControl + gasAlphaTemp). Voir SUIVI_MAILLAGEREEL_V6.md.
+gasChemistryTimeStepControl true;
+// gasAlphaTemp 0.005 (10x plus serre que 0.05) avait ete teste pour eviter
+// le SIGFPE gaz sans toucher au code source -- evitait bien le crash mais
+// faisait chuter le pas de temps a un rythme impraticable pres du seuil
+// critique (pas une vraie solution). Root cause reelle trouvee : T d'essai
+// (interne a l'ODE, invisible sur les champs converges) explore par
+// n'importe quel integrateur (seulex ET RKF45, teste identique) peut aller
+// negatif/nul, et ArrheniusReactionRate (OpenFOAM standard) fait
+// exp(-Ta/T) SANS AUCUNE garde -- contrairement a notre classe solide qui a
+// un seuil Tcrit. Fixe a la source : nouvelle classe boundedArrheniusReactionRate
+// (copie avec plancher T, dans notre propre fork -- voir
+// porousGasificationFoamMR/boundedArrheniusReactionRate{.H,I.H} et
+// makeBoundedArrheniusReactions.C), type "irreversibleBoundedArrhenius"
+// utilise ci-dessus. gasAlphaTemp revient a sa valeur raisonnable d'origine.
+gasAlphaTemp 0.1;   // Test 91 : 0.05 -> 0.1 (numerique, acceleration ; la combustion gaz passe par laminarEDM)
+
+turbulentReaction   off;
+solidReactionEnergyFromEnthalpy false;
+stoichiometricReactions false;
+showRelativeReactionRates false;
+
+// Fix (2026-09-10) : diffusionLimitedReactions=true causait un SIGFPE
+// deterministe dans ODESolidHeterogeneousChemistryModel::jacobian() des
+// que le pas de temps devenait tres petit (~1e-5s, cf gasChemistryTimeStepControl
+// ci-dessus). Root cause exacte non isolee malgre instrumentation extensive
+// (isnan/isinf a chaque point atteignable -- jamais declenche, le piege FPE
+// semble synchrone dans un appel pow()/exp() interne, avant stockage d'un
+// resultat verifiable) -- mais isolee EMPIRIQUEMENT : desactiver ce switch
+// seul fait disparaitre le crash (t=2.2e-5s -> t>0.012s). Simplification
+// physique reelle (reactions char+O2/Boudouard/gaz-a-l'eau limitees par
+// la seule cinetique intrinseque, sans resistance de diffusion gazeuse en
+// serie) plutot qu'un contournement numerique arbitraire -- effet attendu
+// faible dans ce regime mais pas encore quantifie. Voir SUIVI_MAILLAGEREEL_V6.md.
+// Test ODE solver (2026-09-10) : diffusionLimitedReactions remis a TRUE
+// (physique complete) pour tester si un solveur ODE EXPLICITE cote solide
+// (RKF45, n'appelle jamais jacobian() -- verifie dans le code source ODE,
+// contrairement a seulex/Rosenbrock*/rodas*/SIBS qui eux l'appellent tous)
+// contourne structurellement le SIGFPE de jacobian() sans avoir besoin de
+// desactiver la limitation par diffusion. Voir solidOdeCoeffs ci-dessous
+// et SUIVI_MAILLAGEREEL_V6.md.
+diffusionLimitedReactions true;
+
+// Test ODE solver (2026-09-10) : solide RKF45 confirme -- contourne
+// entierement le SIGFPE jacobian() meme avec diffusionLimitedReactions=true
+// (t=0.0103s, meme physique complete, aucun crash solide). Le run retombe
+// ensuite sur LE MEME crash gaz qu'avant (kf()/seulex/StandardChemistryModel).
+// Gaz aussi teste en RKF45 -- MEME crash exact (t~0.0103s), confirmant que
+// le choix de solveur ODE n'est pas le facteur cote gaz (contrairement au
+// solide) -- root cause reelle et fix trouves ailleurs (boundedArrheniusReactionRate,
+// voir plus haut). Solveur gaz revient a seulex (le solver de reference,
+// plus rien ne justifie RKF45 ici une fois la vraie cause corrigee a la
+// source). Voir SUIVI_MAILLAGEREEL_V6.md.
+// Nouveau crash (2026-09-10) : plus dans kf()/derivatives() (corrige par
+// boundedArrheniusReactionRate) mais DANS seulex::solve() lui-meme
+// (t=0.0132s, T gaz~1930K -- premiere fois que la combustion atteint des
+// conditions aussi intenses dans cette investigation). Test un par un,
+// sur demande utilisateur : seulex -> Rosenbrock34 (solveur implicite
+// alternatif, jacobien standard StandardChemistryModel -- pas notre code
+// solide -- jamais teste). Voir SUIVI_MAILLAGEREEL_V6.md.
+odeCoeffs
+{
+    solver          Rosenbrock34;
+    absTol          1e-10;
+    relTol          1e-6;
+    maxSteps        100000;
+}
+
+solidOdeCoeffs
+{
+    // Test ODE solver (2026-09-10) : seulex -> RKF45 (Runge-Kutta-Fehlberg
+    // explicite, pas adaptatif avec estimation d'erreur integree). N'appelle
+    // jamais jacobian() -- objectif : contourner structurellement le SIGFPE
+    // deterministe trouve dans ODESolidHeterogeneousChemistryModel::jacobian()
+    // (cf commentaire diffusionLimitedReactions plus haut) sans desactiver
+    // la physique de limitation par diffusion.
+    solver      RKF45;
+    absTol      1e-8;
+    relTol      0.01;
+    maxSteps    100000;
+}
+
+// Liste des gaz de pyrolyse (gasTable de la chimie solide). ORDRE IMPOSE : elle doit
+// etre IDENTIQUE, espece par espece et dans le meme ordre, a la liste 'species' de
+// constant/fluidZone/thermo.compressibleGas (phase gaz) -- volPyrolysis::Srho(i) de notre
+// fork utilise encore RRg(i) au lieu de RRg(j) (bug amont corrige par pjzuk c4ab0129) :
+// sans ordre identique, la source de masse de l'espece i irait dans l'equation d'une autre
+// espece. Kim 2016 (2026-09-29) : C6H5OH (goudron) AJOUTE EN DERNIER dans les deux listes.
+species 	//gaseous products of reactions
+(
+    CO N2 O2 CO2 H2 CH4 H2O C6H5OH
+);
+
+// =========================================================================
+// Kim 2016 (2026-09-29) : SCHEMA SOLIDE DU BOIS -- detail, sources et bilans dans
+// ../data/pyrolysis_scheme_wood.md ; bilans recalcules par
+// ../data/scripts/wood_pyrolysis_closure.py.
+// Especes solides (solidThermophysicalProperties) : moisture, fuel (= bois SEC SANS
+// CENDRE, 91.84 % du brut), char (carbone pur, forme par la pyrolyse, Y0 = 0), ash.
+// Format : (A[1/s] Ta[K] Tcrit[K] hr[J/kg de substrat converti, + = endothermique]
+// n_solide [n_gaz]). stoichiometricReactions false => coefficients MASSIQUES, somme
+// produits = somme reactifs a 1e-15 pres (verifie en double precision par le script).
+// solidReactionEnergyFromEnthalpy false => chaleur = hr ci-dessous ; fuel/char Hf = 0 ;
+// les gaz portent leur enthalpie de formation JANAF.
+// =========================================================================
+solidReactions
+(
+    // Sechage : cinetique GENERIQUE de l'eau (A=1e4, Ta=6000, Tcrit=373 K,
+    // Lv=2.26e6 J/kg), validee reint/ puis test57-99 ; reprise telle quelle
+    // (model_properties_woodpellet.md ligne 13 : inchangee).
+    irreversibleSolidArrheniusHeterogeneousReaction
+    moisture = 1.0 H2O
+    (1000000 6000 373 2.26e6 1.0)
+
+    // Devolatilisation du bois : UNE reaction globale (1 etape), bois sec sans cendre ->
+    // char + gaz + goudron.
+    //  * Cinetique : Di Blasi C., Branca C. (2001) Ind. Eng. Chem. Res. 40:5547,
+    //    doi:10.1021/ie000997e (resume VERIFIE) : 1 etape, E = 141.2 +/- 15.8 kJ/mol,
+    //    ln A = 22.2 +/- 2.9 (A = 4.4e9 1/s) ; Ta = 141200/8.314462 = 16982 K. Bois de hetre
+    //    (feuillu), 573-708 K. Controle : pic DTG calcule 353/368 C a 10/20 K/min contre
+    //    364 C (Kim Fig. 2, vitesse non donnee) -> plausible, pas un calage.
+    //  * Rendement en char Yc = 0.20 kg/kg bois daf : residu ATG Kim Fig. 2 a 800 C
+    //    = 19.5 % daf ; CF Kim Table 1 = 14.7 % daf (borne basse) ; plage 0.15-0.25.
+    //    ALTERNATIVE (decision utilisateur, cf. Kim Table 2) : Yc = 0.25 ->
+    //      100 fuel = 25.00 char + 9.09 CO + 17.34 CO2 + 0.94 H2 + 1.57 CH4 + 28.38 H2O + 17.68 C6H5OH
+    //      hr = -5.45e5 (PCS sec) / -2.14e6 (PCS brut) J/kg
+    //  * Repartition des volatils : Di Blasi C. (2000) Chem. Eng. Sci. 55:2931,
+    //    doi:10.1016/S0009-2509(99)00562-X, Tableau 3, jeu I (plaquettes de bois 0.5-1 cm,
+    //    lit fixe, 850 K ; mesures Di Blasi et al. 1999) (TEXTE INTEGRAL LU) : CO 7.5, CO2 13,
+    //    H2 1, CH4 1.5, H2O 25, goudron 19 (% du bois sec), remise a l'echelle sur 1-Yc = 0.80,
+    //    puis AJUSTEE UNIQUEMENT pour boucler C, H, O de Kim Table 1 (moindre ecart relatif) :
+    //    CO +13 %, CO2 +24 %, H2 -21 %, CH4 -7 %, H2O -16 %, goudron +1 %.
+    //    Bilan apres arrondi : C -0.007, H +0.001, O +0.005 % massique.
+    //  * Goudron = C6H5OH (phenol) : produit "secondaire" (phenolique) de la classification
+    //    Milne, Evans & Abatzoglou 1998 (NREL/TP-570-25357), donnees thermo evaluees (Burcat
+    //    'g 8/00') ; c'est le candidat qui demande le moins d'ajustement du partage publie.
+    //  * Chaleur de pyrolyse hr = -3.83e5 J/kg (legerement EXOTHERMIQUE) : bouclage sur le
+    //    PCS de Kim pris sur base SECHE (18.41 MJ/kg daf ; base retenue car elle seule
+    //    reproduit Channiwala-Parikh pour les DEUX combustibles de Kim Table 1, boues
+    //    23.21 vs 23.15 MJ/kg daf). Si le PCS etait sur brut : hr = -1.98e6 (non plausible).
+    //    Litterature (hors bilan) : +4.2e5 (Di Blasi 2000 Tab. 4), +2e5 (Thunman & Leckner
+    //    2007) -> sensibilite. DECISION UTILISATEUR (voir pyrolysis_scheme_wood.md).
+    //  * Tcrit = 300 K : simple garde (k(300 K) ~ 1e-15 1/s), comme test99.
+    // Ordre des gaz de la ligne sans importance pour le parseur ; ordre des LISTES d'especes
+    // en revanche impose (voir 'species' ci-dessus).
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 fuel = 20 char + 10.13 CO + 19.24 CO2 + 0.94 H2 + 1.67 CH4 + 25.17 H2O + 22.85 C6H5OH
+    (4.4e9 16982 300 4.2e5 1.0)   // 2026-09-30 SENSIBILITE DECLAREE (seul changement vs run2c) : hr -3.83e5 (bouclage PCS, exothermique) -> +4.2e5 J/kg (endothermique, Di Blasi 2000 Tab. 4) ; front Kim x3 trop rapide
+
+    // Oxydation du char (C + O2 -> CO2 et C + 0.5 O2 -> CO), Boudouard, gaz a l'eau :
+    // VALEURS test99/test103 REPRISES A L'IDENTIQUE (char = carbone pur dans les deux cas).
+    //  * Rapport CO/CO2 : Arthur J.R. (1951) Trans. Faraday Soc. 47:164,
+    //    CO/CO2 = 2500 exp(-6240/T) -> A2 = 2500 A1, Ta2 = Ta1 + 6249 (valeur projet ;
+    //    6240 dans la source : ecart de 9 K sans effet, facteur exp(9/T) < 1.01, garde
+    //    tel quel pour continuite avec test99/103).
+    //  * Couple de base A1 = 5.61e9 1/s, Ta1 = 19600 K : SOURCE NON DOCUMENTEE dans le projet
+    //    (model_properties_woodpellet.md ligne 14c). Reactivite d'un char de GRANULE de bois
+    //    frais attendue plus elevee que celle d'un biochar industriel ; la loi du char de pin
+    //    de Janse et al. 1998 (Ind. Eng. Chem. Res. 37:3909, E = 125 kJ/mol, resume verifie)
+    //    ne peut pas etre transposee tant que les unites de r et p_O2 ne sont pas lues.
+    //    -> A1 = candidat de calage (x0.3-3, calibration_validation_plan.md).
+    //  * hr : -3.28e7 (393.5 kJ/mol / 12.011), -9.21e6 (110.5 kJ/mol), +1.43e7 (172.5 kJ/mol),
+    //    +1.09e7 (131.3 kJ/mol) J/kg de char : enthalpies standard, coherentes avec JANAF.
+    //  * Boudouard / gaz a l'eau (A, Ta) : source non documentee dans le projet (Di Blasi
+    //    2009 PECS 35:121 a lire) ; faible influence attendue (pics COS <= 1000 C, Kim Fig. 6).
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 32 O2 = 44 CO2
+    (5.61e9 19600 300 -8.945e6 1.0 1.0)   // 2026-10-12 hrMasse : hr par kg de reactifs totaux (omega() divise par totalSubstrates=44) ; ancien -3.28e7 par kg de char
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 16 O2 = 28 CO
+    (1.4025e13 25849 300 -3.947e6 1.0 1.0)   // 2026-10-12 hrMasse : -9.21e6 x 12/28
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 44 CO2 = 56 CO
+    (4065 15600 300 3.064e6 1.0 1.0)   // v1.1 campagne : Mehrabian et al. 2014 converti (CONSTATS 21.43) ; etait (3.6e5 29000 ...)
+
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 char + 18 H2O = 28 CO + 2 H2
+    (5323 15600 300 4.36e6 1.0 1.0)   // v1.1 campagne : Mehrabian et al. 2014 converti ; etait (2e5 28000 ...)
+);
+
+// ************************************************************************* //
