@@ -45,6 +45,8 @@ Foam::shrinkingSphereCONV::shrinkingSphereCONV
     dMin_(0),
     correlated_(false),
     h_(0),
+    biotCorrection_(false),
+    kParticle_(0),
     Up_(db().lookupObject<volVectorField>("U")),
     rhop_(db().lookupObject<volScalarField>("rho")),
     alphap_(db().lookupObject<volScalarField>("thermo:alpha")),
@@ -105,6 +107,10 @@ Foam::tmp<Foam::volScalarField> Foam::shrinkingSphereCONV::CONV() const
             const scalar Pr = mup_[celli]*Cp[celli]/max(kappa, small);
             h = (2.0 + 1.1*pow(Re, 0.6)*cbrt(Pr))*kappa/d;
         }
+        if (biotCorrection_)
+        {
+            h /= 1.0 + h*0.5*d/(5.0*kParticle_);
+        }
         CONV[celli] = h*av;
     }
 
@@ -133,6 +139,17 @@ bool Foam::shrinkingSphereCONV::read()
     {
         params.lookup("h") >> h_;
     }
+    biotCorrection_ = params.lookupOrDefault<Switch>("biotCorrection", false);
+    if (biotCorrection_)
+    {
+        params.lookup("kParticle") >> kParticle_;
+    }
+    Info<< "shrinkingSphereCONV: biotCorrection " << biotCorrection_;
+    if (biotCorrection_)
+    {
+        Info<< ", kParticle " << kParticle_ << " W/m/K";
+    }
+    Info<< endl;
     Info<< "shrinkingSphereCONV: d0 " << d0_ << " m, dMin " << dMin_
         << " m, h " << (correlated_ ? word("Wakao-Kaguei") : Foam::name(h_))
         << endl;

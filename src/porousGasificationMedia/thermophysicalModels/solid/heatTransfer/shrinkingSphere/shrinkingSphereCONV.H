@@ -27,6 +27,11 @@ Description
     hModel WakaoKaguei: Nu = 2 + 1.1 Re^0.6 Pr^(1/3), Re = rho |U| d/mu,
     h = Nu kappa/d with kappa = Cp alpha (thermo:alpha = kappa/Cp in OpenFOAM 8).
     With d0 and the initial porosity of constCONV, the initial a_v equals its SAV.
+    biotCorrection yes (article 2, chantier 2): internal conduction resistance of
+    the particle in series, h_eff = h/(1 + Bi/5), Bi = h (d/2)/kParticle, which
+    makes the single-temperature model follow the MEAN temperature of a sphere
+    heated by convection (exact Fourier solution: error on the mean 0.021 -> 0.001
+    at Bi = 0.3, 0.161 -> 0.031 at Bi = 3; validation_Kim2016/article2/tests).
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,6 +59,10 @@ class shrinkingSphereCONV
 
         //- Constant heat transfer coefficient [W/m2/K]
         scalar h_;
+
+        //- Internal resistance of the particle (Biot correction) and its conductivity [W/m/K]
+        Switch biotCorrection_;
+        scalar kParticle_;
 
         const volVectorField& Up_;
         const volScalarField& rhop_;
