@@ -1,0 +1,6 @@
+SOURCE = \
+porousGasificationFoamMR.C \
+solidRegionDiffNo.C \
+makeBoundedArrheniusReactions.C \
+makeStrainMixingLimitedCombustion.C \
+makeLaminarEDMCombustion.C 

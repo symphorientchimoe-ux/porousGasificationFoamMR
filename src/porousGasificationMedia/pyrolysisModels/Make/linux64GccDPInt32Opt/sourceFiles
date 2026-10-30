@@ -1,0 +1,4 @@
+SOURCE = \
+pyrolysisModel/heterogeneousPyrolysisModel/heterogeneousPyrolysisModel.C \
+pyrolysisModel/heterogeneousPyrolysisModel/heterogeneousPyrolysisModelNew.C \
+pyrolysisModel/volPyrolysis/volPyrolysis.C 

@@ -9,11 +9,13 @@ heatTransfer/heatTransferModel/heatTransferModel.C
 heatTransfer/const/const.C
 heatTransfer/pipe/pipe.C
 heatTransfer/cylinder/cylinder.C
+heatTransfer/shrinkingSphere/shrinkingSphereCONV.C
 
 specieTransfer/specieTransferModel/specieTransferModel.C
 specieTransfer/empty/emptyST.C
 specieTransfer/const/constST.C
 specieTransfer/cylinder/cylinderST.C
 specieTransfer/pipe/pipeST.C
+specieTransfer/shrinkingSphere/shrinkingSphereST.C
 
 LIB = $(FOAM_USER_LIBBIN)/libHGSsolid

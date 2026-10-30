@@ -59,17 +59,46 @@ License
         tmp<volScalarField> tmuErgun(thermo.mu());
         const volScalarField& muErgun = tmuErgun();
 
+        // Article 2 (2026-10-30): local particle diameter of shrinking spheres,
+        // d = ergunDp*cbrt((1-eps)/phiS0) (shrinkingParticle.H), instead of the
+        // constant ergunDp. Off by default (= version 1.1).
+        const bool ergunLocalDp =
+            runTime.controlDict().lookupOrDefault<Switch>("ergunLocalDp", false);
+        const scalar dpMin =
+            runTime.controlDict().lookupOrDefault<scalar>("ergunDpMin", 0.1*dp);
+        // number of particles per cell: phiS0 (bed collapse on), else the
+        // initial porosity porosityF0; without either, d stays at ergunDp
+        const volScalarField* phiS0Ptr =
+            mesh.foundObject<volScalarField>("phiS0")
+          ? &mesh.lookupObject<volScalarField>("phiS0") : nullptr;
+        const volScalarField* por0Ptr =
+            mesh.foundObject<volScalarField>("porosityF0")
+          ? &mesh.lookupObject<volScalarField>("porosityF0") : nullptr;
+
         forAll(bedCells, i)
         {
             const label celli = bedCells[i];
 
             const scalar eps = max(min(porosityF[celli], 0.99), 0.05);
 
-            scalar DfVal = 150.0*sqr(1.0 - eps)/(pow3(eps)*sqr(dp));
+            scalar dpLoc = dp;
+            if (ergunLocalDp && (phiS0Ptr || por0Ptr))
+            {
+                const scalar phi0 =
+                    phiS0Ptr
+                  ? (*phiS0Ptr)[celli]
+                  : 1.0 - (*por0Ptr)[celli];
+                dpLoc = shrinkingParticle::diameter
+                (
+                    dp, dpMin, max(1.0 - porosityF[celli], 0.0), phi0
+                );
+            }
+
+            scalar DfVal = 150.0*sqr(1.0 - eps)/(pow3(eps)*sqr(dpLoc));
             if (ergunInertialEps)
             {
                 DfVal +=
-                    1.75*(1.0 - eps)/(pow3(eps)*dp)
+                    1.75*(1.0 - eps)/(pow3(eps)*dpLoc)
                    *rho[celli]*mag(U[celli])/max(muErgun[celli], small);
             }
 
