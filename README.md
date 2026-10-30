@@ -88,11 +88,11 @@ Each correction of version 1.1 has a switch; with all of them set to `no`, versi
 
 ## Test cases
 
-See `tutorials/README.md`. [[TO DO: add the cases and their reference outputs]]
+See `tutorials/README.md`: the reference case of the paper, its variant with a lid, and a two-second restart with reference output and a comparison script (`kimReactor149_restart/check.sh`), which is the quick check of an installation.
 
 ## Citing
 
-If you use this solver, please cite the accompanying article [[TO DO: reference once published]] and the original porousGasificationFoam paper: P.J. Żuk, B. Tużnik, T. Rymarz, K. Kwiatkowski, M. Dudyński, F.C.C. Galeazzo, G.C. Krieger Filho, OpenFOAM solver for thermal and chemical conversion in porous media, Comput. Phys. Commun. 278 (2022) 108407, https://doi.org/10.1016/j.cpc.2022.108407.
+If you use this solver, please cite the accompanying article (S.K. Tchimoe et al., porousGasificationFoamMR: an OpenFOAM solver for transient fixed-bed biomass conversion with conjugate heat transfer and bed shrinkage, submitted to Computer Physics Communications, 2026) and the original porousGasificationFoam paper: P.J. Żuk, B. Tużnik, T. Rymarz, K. Kwiatkowski, M. Dudyński, F.C.C. Galeazzo, G.C. Krieger Filho, OpenFOAM solver for thermal and chemical conversion in porous media, Comput. Phys. Commun. 278 (2022) 108407, https://doi.org/10.1016/j.cpc.2022.108407.
 
 ## Licence
 

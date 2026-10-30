@@ -13,27 +13,23 @@ FoamFile
     location    "60/fluidZone";
     object      a;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 -1 0 0 0 0 0 ];
+dimensions      [0 -1 0 0 0 0 0];
 
-internalField   uniform 0.1;
+internalField   uniform 0.10000000000000001;
 
 boundaryField
 {
     inlet
     {
         type            calculated;
-        value           uniform 0.1;
+        value           uniform 0.10000000000000001;
     }
     outlet
     {
         type            calculated;
-        value           uniform 0.1;
-    }
-    lid
-    {
-        type            calculated;
-        value           uniform 0.1;
+        value           uniform 0.10000000000000001;
     }
     back
     {
@@ -46,8 +42,14 @@ boundaryField
     fluidZone_to_solidZone
     {
         type            calculated;
-        value           uniform 0.1;
+        value           uniform 0.10000000000000001;
+    }
+    lid
+    {
+        type            calculated;
+        value           uniform 0.10000000000000001;
     }
 }
+
 
 // ************************************************************************* //

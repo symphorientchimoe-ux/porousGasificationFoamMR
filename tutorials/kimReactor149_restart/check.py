@@ -13,7 +13,7 @@ def last_row(path):
     rows = [r for r in rows if not any('(' in x for x in r)]   # scalar probes only
     return np.array(rows[-1], float) if rows else None
 
-# 1. probes: last row (t = 2402 s), relative difference
+# 1. probes: last row (t = 2690 s), relative difference
 worst = (0.0, '')
 ncmp = 0
 for ref in sorted(glob.glob('reference/postProcessing/probes*/**/*', recursive=True)):
@@ -32,7 +32,7 @@ for ref in sorted(glob.glob('reference/postProcessing/probes*/**/*', recursive=T
     if d > worst[0]:
         worst = (d, new)
 tol = 1e-3
-print(f'{"PASS" if worst[0] < tol and ncmp else "FAIL"}  probes at t = 2402 s ({ncmp} files): max relative difference {worst[0]:.2e}, tolerance {tol:g}')
+print(f'{"PASS" if worst[0] < tol and ncmp else "FAIL"}  probes at t = 2690 s ({ncmp} files): max relative difference {worst[0]:.2e}, tolerance {tol:g}')
 ok &= worst[0] < tol and ncmp > 0
 
 # 2. bed collapse: heights and conservation

@@ -39,13 +39,13 @@ purgeWrite      0;
 
 writeFormat     binary;
 
-writePrecision  8;
+writePrecision  17;
 
 writeCompression uncompressed;
 
 timeFormat      general;
 
-timePrecision   6;
+timePrecision   12;
 
 runTimeModifiable yes;
 

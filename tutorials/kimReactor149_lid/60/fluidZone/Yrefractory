@@ -13,8 +13,9 @@ FoamFile
     location    "60/fluidZone";
     object      Yrefractory;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 0 0 0 0 0 0 ];
+dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
@@ -25,10 +26,6 @@ boundaryField
         type            zeroGradient;
     }
     outlet
-    {
-        type            zeroGradient;
-    }
-    lid
     {
         type            zeroGradient;
     }
@@ -45,6 +42,11 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+    lid
+    {
+        type            zeroGradient;
+    }
 }
+
 
 // ************************************************************************* //

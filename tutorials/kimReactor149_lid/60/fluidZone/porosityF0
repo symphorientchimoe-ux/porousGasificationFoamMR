@@ -13,10 +13,11 @@ FoamFile
     location    "60/fluidZone";
     object      porosityF0;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 0 0 0 0 0 0 ];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   nonuniform List<scalar>
+internalField   nonuniform List<scalar> 
 1560
 (
 1
@@ -1592,10 +1593,6 @@ boundaryField
     {
         type            zeroGradient;
     }
-    lid
-    {
-        type            zeroGradient;
-    }
     back
     {
         type            wedge;
@@ -1607,7 +1604,7 @@ boundaryField
     fluidZone_to_solidZone
     {
         type            calculated;
-        value           nonuniform List<scalar>
+        value           nonuniform List<scalar> 
 104
 (
 1
@@ -1717,6 +1714,11 @@ boundaryField
 )
 ;
     }
+    lid
+    {
+        type            zeroGradient;
+    }
 }
+
 
 // ************************************************************************* //

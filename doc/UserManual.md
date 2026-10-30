@@ -144,4 +144,14 @@ Fields added to the usual ones: `qr` (wall radiative flux, W m⁻²), `laminarED
 
 Run in parallel with `decomposePar -allRegions` and `mpirun -np N porousGasificationFoamMR -parallel`. When several runs share a machine, pin each one to its own cores (`taskset -c ... mpirun --bind-to none ...`): by default mpirun binds every run to the same cores.
 
-A restart from a written time is exact only if every lagged quantity is written. Use `writePrecision` 12 or more (or binary format). Restarts of the runs of the paper changed the temperatures above the front by up to about 200 K later in the run (paper, Section 5.5): compare runs restarted from the same state, not a restarted run with an uninterrupted one.
+A restart from a written time is exact only if every lagged quantity is written and the time step sequence is continued. With version 1.0, restarts changed the temperatures above the front by up to about 200 K later in the run (paper, Section 5.5). With version 1.1 (`exactRestart yes`, `writePrecision 17`, `timePrecision 12`), a restart differs from the uninterrupted run by about 0.01 K after 0.05 s; see Section 12.
+
+## 12. Corrections of version 1.1 and exact restarts
+
+Version 1.1 corrects three inherited defects and makes restarts exact. Each change has a switch (table in `README.md`, section "Corrections of version 1.1"); all are on by default, and with all of them set to `no` the solver reproduces version 1.0 bit for bit.
+
+- `conservativeDdt` (`system/controlDict`): the storage terms of the species, energy and pressure equations use the old-time porosity and density. With it, the dilatation of the gas heated by an igniter can hold the time step very low through the velocity-growth limit at start-up; in the reference case `maxUa` is set to 3 for the first 60 s only (see `tutorials/kimReactor149/Allrun`).
+- `boundaryWhereIs` and `exactBorderFactor` (`constant/fluidZone/radiationProperties`): boundary values of the bed indicator in the P1 model, and exact border factor of the bed surface (written as the field `surfFrad`).
+- `exactRestart` (`system/controlDict`): the initial chemistry time step is applied only at a start from t = 0. For a restart to continue the same sequence of time steps, write the fields with `writePrecision 17` and `timePrecision 12`.
+
+Long runs can be split into passes that restart from the last written time; the GitHub Actions workflow in `.github/workflows/` and the scripts in `calcul_distant/` do this automatically (see `calcul_distant/LISEZMOI.md`).

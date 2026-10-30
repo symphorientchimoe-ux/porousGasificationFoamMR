@@ -120,6 +120,9 @@ solidReactions
     (4.4e9 16982 300 4.2e5 1.0)
 
     irreversibleSolidArrheniusHeterogeneousReaction
+    // Char oxidation: first-order rate of Fatehi and Kaviany, Combust. Flame 99 (1994) 1-17,
+    // Table 3 (5.67e9 1/s, 163 kJ/mol, after Kashiwagi and Nambu 1992), as written in the
+    // gasifier tutorial of porousGasificationFoam (5.61e9 1/s). Heats per kg of reactants.
     12 char + 32 O2 = 44 CO2
     (5.61e9 19600 300 -8.945e6 1.0 1.0)
 
@@ -128,12 +131,15 @@ solidReactions
     (1.4025e13 25849 300 -3.947e6 1.0 1.0)
 
     irreversibleSolidArrheniusHeterogeneousReaction
+    // Char gasification (version 1.1): Mehrabian et al., Fuel 122 (2014) 164-178 (after
+    // Johansson et al. 2007), k_c = 3.42 T exp(-15600/T) m/s, converted to the volumetric form
+    // of the solver with S_v = 449 1/m, rho_g T = 319 kg K/m3 (paper, Table 2).
     12 char + 44 CO2 = 56 CO
-    (3.6e5 29000 300 3.064e6 1.0 1.0)
+    (4065 15600 300 3.064e6 1.0 1.0)
 
     irreversibleSolidArrheniusHeterogeneousReaction
     12 char + 18 H2O = 28 CO + 2 H2
-    (2e5 28000 300 4.36e6 1.0 1.0)
+    (5323 15600 300 4.36e6 1.0 1.0)
 );
 
 // ************************************************************************* //

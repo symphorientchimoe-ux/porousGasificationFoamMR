@@ -8,15 +8,14 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       polyBoundaryMesh;
     location    "constant/fluidZone/polyMesh";
     object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-6
+5
 (
     inlet
     {
@@ -24,30 +23,26 @@ FoamFile
         nFaces          15;
         startFace       3001;
     }
-
     outlet
     {
         type            patch;
-        nFaces          2;
+        nFaces          15;
         startFace       3016;
     }
-
     back
     {
         type            wedge;
         inGroups        List<word> 1(wedge);
         nFaces          1560;
-        startFace       3018;
+        startFace       3031;
     }
-
     front
     {
         type            wedge;
         inGroups        List<word> 1(wedge);
         nFaces          1560;
-        startFace       4578;
+        startFace       4591;
     }
-
     fluidZone_to_solidZone
     {
         type            mappedWall;
@@ -59,21 +54,11 @@ mappedPatch
 )
 ;
         nFaces          104;
-        startFace       6138;
+        startFace       6151;
         sampleMode      nearestPatchFace;
         sampleRegion    solidZone;
         samplePatch     solidZone_to_fluidZone;
     }
-
-    lid
-    {
-        type            wall;
-        inGroups        List<word> 1(wall);
-        nFaces          13;
-        startFace       6242;
-    }
-
 )
-
 
 // ************************************************************************* //

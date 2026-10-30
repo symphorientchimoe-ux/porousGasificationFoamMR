@@ -1,9 +1,11 @@
 #!/bin/sh
 # Counter-current wood-pellet bed of Kim et al. (Waste Management 49, 2016), primary air 149 kg m-2 h-1,
-# 5 mm bed cells: the reference validation run of the paper (Section 5). Two processors.
-# The igniter is held at 800 K for the first 60 s (starting at 1000 K diverges), then at 1000 K until
-# igniterDuration (300 s). The igniter settings are read only at start-up, hence the two stages.
-# Run time: about 35 h on two cores of a 4-core 2016 workstation to reach the front at T1 (about 4300 s simulated).
+# 5 mm bed cells, open top: the reference validation run of the paper (version 1.1, Section 5, Table 7).
+# Two processors. Stage 1 (0-60 s): igniter held at 800 K (starting at 1000 K diverges) and maxUa = 3
+# (with the conservative storage terms of version 1.1, the dilatation near the igniter otherwise holds
+# the time step at 1e-6 s). Stage 2 (from 60 s): igniter at 1000 K until igniterDuration (300 s),
+# maxUa = 0.3. The igniter settings are read only at start-up, hence the two stages.
+# Run time: about 70 simulated s per wall-clock hour on two cores; the front reaches T1 at about 4700 s.
 cd "${0%/*}" || exit 1
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 rm -rf 0 && cp -r 0.orig 0
@@ -12,7 +14,9 @@ runApplication decomposePar -allRegions
 P=constant/fluidZone/pyrolysisProperties
 foamDictionary -entry pyrolysisCoeffs/igniterTemperature -set 800 $P
 foamDictionary -entry endTime -set 60 system/controlDict
+foamDictionary -entry maxUa -set 3 system/controlDict
 runParallel -s stage1 porousGasificationFoamMR
 foamDictionary -entry pyrolysisCoeffs/igniterTemperature -set 1000 $P
 foamDictionary -entry endTime -set 5000 system/controlDict
+foamDictionary -entry maxUa -set 0.3 system/controlDict
 runParallel -s stage2 porousGasificationFoamMR
