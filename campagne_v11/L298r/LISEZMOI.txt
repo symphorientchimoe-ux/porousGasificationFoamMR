@@ -1,0 +1,6 @@
+L298 : débit 298 kg/m2h, couvercle oui, départ base_298 à 60 s
+couvercle posé à 60 s (poser_couvercle.py)
+arrêt 420 s après le passage à 600 °C de la colonne 3
+endTime 6000
+
+02/11/2026 : L298r = L298 repris à 2244,64 s (archive de la passe 29, run 41422900710). L298 était lié à R149O, arrêté en erreur à 11106 s, et la chaîne ne relançait plus la paire. Passages déjà obtenus : T5 716,6 s, T4 1358,0 s, T3 1957,5 s.
