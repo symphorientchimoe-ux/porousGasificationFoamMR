@@ -1,0 +1,27 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      chemistryProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Kim 2016 (2026-09-29) : fichier de NIVEAU CAS. Le projet a constate (test40,
+// gasifier_maillageReel_v8_...) que les reactions gaz {} et odeCoeffs sont lus ICI et
+// non dans constant/fluidZone/ ; la lecture du source OF8 (basicChemistryModel.C,
+// IOobject sur thermo.db() = maillage de region) suggere l'inverse. Pour ne dependre
+// d'aucune des deux hypotheses, ce fichier INCLUT le fichier de region : une seule
+// source de verite, aucune derive possible entre les deux copies.
+// (Voir ../data/pyrolysis_scheme_wood.md, liste de controle point 1.)
+
+#include "fluidZone/chemistryProperties"
+
+// ************************************************************************* //

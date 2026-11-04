@@ -1,0 +1,37 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Test (2026-09-21) : laminaire -> RAS kEpsilon. Instrumentation (test 11,
+// EEqn.H) a montre que le franchissement du plafond JANAF se produit
+// entierement dans gas_zone (porosityF=1, heatTransfer=heatUpGas=0 --
+// aucune source locale), par pure acceleration convective/compressible :
+// aucun frein present (resistance de Darcy nulle par conception hors du
+// lit, fieldPorosityModel::addResistance). En realite, le melange
+// turbulent est precisement ce qui empeche un panache chaud de s'accelerer
+// sans limite en espace libre -- jamais active jusqu'ici sur ce cas.
+// turbulence->divDevTau(U) est deja appele inconditionnellement dans
+// UEqn.H (deja ecrit pour supporter RAS, pas de changement de code
+// necessaire) -- seul ce switch + les champs k/epsilon/nut (0/fluidZone/)
+// sont nouveaux.
+//
+// Test 17 (2026-09-21) : retour a laminaire (valeur v7) -- strategie
+// "repartir de v7, isoler uniquement le maillage". Les champs
+// 0/fluidZone/k,epsilon,nut,alphat restent presents mais ne sont plus lus
+// en laminaire (harmless). Voir constant/g pour le contexte complet.
+simulationType  laminar;
+
+// ************************************************************************* //

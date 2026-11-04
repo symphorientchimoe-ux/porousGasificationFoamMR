@@ -1,0 +1,3 @@
+C_R1_UaSmall01 : C_retrecissement_Biot (branche v2 = v1.1 + article 2) repris à 120 s (état local du 04/11, calcul bloqué vers 131-137 s par le critère Ua)
+remède : UaSmall 0.01 -> 0.1 m/s (plancher de vitesse du critère Ua)
+endTime 5400 ; une seule modification par rapport à C_retrecissement_Biot
