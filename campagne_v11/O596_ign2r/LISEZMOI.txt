@@ -1,0 +1,5 @@
+O596_ign2r : debit 596 kg/m2h, ciel ouvert, allumeur sur 2 rangees (z 0.380-0.400) a 1000 K jusqu a 300 s, v1.1
+Essai DIAGNOSTIQUE (hors protocole aveugle) : les 2 rangees d allumeur suffisent-elles a lancer le front a 596 ?
+Etat a 65 s calcule en local (0-60 s : 800 K, maxUa 3 ; 60-65 s : 1000 K, maxUa 3).
+Phase GitHub 1 : 65 -> 300 s avec maxUa 3 (Ua bloquait dt a ~6e-6 s avec 0.3). Phase 2 (a pousser ensuite) : 300 -> 1500 s, maxUa 0.3.
+Comparer a O596 (1 rangee, pas d allumage).

@@ -1,0 +1,28 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    object      heatTransferProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Echange gaz-solide dans le lit (modele constCONV, comme test99).
+// SAV = 6(1-eps)/dp_sv (surface specifique du lit) et h (correlation type
+// Wakao & Kaguei a Re_p du granule 5 x 25 mm, Kim 2016 Table 1) : dependent
+// de eps et du diametre equivalent -> placeholders.
+heatTransferModel constCONV;
+
+Parameters
+{
+    h    [[FROM data/model_properties_woodpellet.md]];   // cle : h gaz-solide [W/m2/K]
+    SAV  [[FROM data/model_properties_woodpellet.md]];   // cle : SAV = 6(1-eps)/dp [1/m]
+}
+
+// ************************************************************************* //
