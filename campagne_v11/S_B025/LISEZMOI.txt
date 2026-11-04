@@ -1,0 +1,4 @@
+S_B025 : debit 149 kg/m2h, couvercle non, depart base_149 a 60 s (copie de R149O)
+constant/fluidZone/combustionProperties : B de l EDM 0.5 -> 0.25 (seul changement) ; rapport d expertise du 04/11 (Tableau 9)
+arret 60 s apres le passage a 600 C de la colonne 4
+endTime 15000
