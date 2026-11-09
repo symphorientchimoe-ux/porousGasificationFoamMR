@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; location "constant/fluidZone"; object fvOptions; }
+// Plaque perforee support du lit, Kim 2016 sect. 2.2 / Fig. 1 ("perforated
+// plate ... to support the bed of fuel particles and distribute air
+// uniformly"). Taux d'ouverture, diametre et nombre de trous, epaisseur :
+// NON DONNES par Kim 2016 -> zeta en PLACEHOLDER.
+// Meme mise en oeuvre que test96/99 : cellZone 'grate' = 5 couches de 2.5 mm
+// (L = 0.0125 m) juste sous le lit, Darcy-Forchheimer isotrope,
+//   S = -(0.5 rho |U| F) U  ->  dp = zeta 0.5 rho U^2  si  F = zeta / L.
+// zeta : Idelchik (Fried & Idelchik 1989, diag. 8.1, plaque mince a arete
+// vive, Re > 1e5), rapporte a la vitesse d'approche (section pleine) :
+//   zeta = (0.707 sqrt(1-phi) + 1 - phi)^2 / phi^2    (phi = taux d'ouverture)
+// Table de sensibilite (calcul pur de la formule, PAS une donnee Kim) :
+//   phi = 0.05 -> zeta 1075 -> F = 8.60e4 1/m
+//   phi = 0.10 -> zeta  247 -> F = 1.97e4 1/m
+//   phi = 0.20 -> zeta   51 -> F = 4.10e3 1/m
+//   phi = 0.30 -> zeta   18 -> F = 1.48e3 1/m
+// Ordre de grandeur : a 149 kg/m2/h, U_approche = 0.035 m/s a 300 K, donc
+// dp_plaque = zeta * 7.3e-4 Pa (0.18 Pa pour phi = 0.10) : la plaque ne
+// controle PAS le debit (CL a debit impose) ; son role ici est la
+// distribution de l'air, comme dans l'experience.
+grate
+{
+    type            explicitPorositySource;
+    explicitPorositySourceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        grate;
+        type            DarcyForchheimer;
+        active          yes;
+        DarcyForchheimerCoeffs
+        {
+            d   (0 0 0);
+            // F = zeta/0.0125 [1/m], meme valeur dans les 3 directions
+            // 2026-09-29 : taux d'ouverture phi = 0.20 -- HYPOTHESE declaree
+            //   (Kim 2016 ne donne ni phi, ni diametre/pas des trous, ni epaisseur).
+            //   zeta = (0.707*sqrt(0.8) + 0.8)^2 / 0.2^2 = 51.3 (Idelchik, formule
+            //   ci-dessus) -> F = 51.3/0.0125 = 4103 1/m, isotrope.
+            //   A debit massique impose, la plaque ne change pas le debit :
+            //   dp_plaque(300 K) = 51.3*0.5*1.1614*0.0356^2 = 0.04 Pa ;
+            //   elle ne fixe que le niveau de pression et la distribution.
+            f   (4103 4103 4103);   // [1/m] HYPOTHESE declaree phi = 0.2 + Idelchik
+            coordinateSystem
+            {
+                type    cartesian;
+                origin  (0 0 0);
+                coordinateRotation { type axesRotation; e1 (1 0 0); e2 (0 1 0); }
+            }
+        }
+    }
+}

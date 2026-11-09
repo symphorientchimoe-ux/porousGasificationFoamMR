@@ -1,0 +1,5 @@
+W149adia : debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s)
+paroi exterieure du refractaire adiabatique (outerWall zeroGradient dans processor*/60/solidZone/T) (seul changement)
+ajout : system/coupes (coupe mediane fluide et solide toutes les 300 s, postProcessing/coupeFluide et coupeSolide)
+arret 60 s apres le passage a 600 C de la colonne 4 (T2), comme S_kr05/S_kr2
+article ECM, 09/11/2026
