@@ -1,0 +1,22 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Version:  8
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/fluidZone";
+    object      porosityProperties;
+}
+// Test 74 (2026-09-26) -- hypothese H1 : le lit ne portait que le terme visqueux
+// d'Ergun (updateDf.H : Df = 150(1-eps)^2/(eps^3 dp^2)). A Re_p ~ 770 le terme
+// inertiel domine (~17x) : Ergun (1952), Chem. Eng. Prog. 48:89 :
+//   dp/dz = 150 mu (1-eps)^2/(eps^3 dp^2) U + 1.75 rho (1-eps)/(eps^3 dp) |U| U
+// fieldPorosityModel ajoute f*rho*|U| a mu*Df (fieldPorosityModelTemplates.C) ->
+//   f = 1.75 (1-eps)/(eps^3 dp) = 1.75*0.519/(0.481^3*0.049) = 166.5 ~ 167 1/m
+// (eps = 0.481, dp = 0.049 m, mesures WBT). Limite : f constant (ne suit pas
+// eps(t) ; surestime un peu la resistance des cellules deja consumees).
+forchheimerCoeff 0;   // Test 81 : terme inertiel desormais calcule a porosite locale dans updateDf.H (ergunInertialEps)

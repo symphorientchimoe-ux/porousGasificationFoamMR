@@ -1,0 +1,4 @@
+G298wgstar : debit 298 kg/m2h, couvercle oui, copie de campagne_v11/L298 (etat v1.1 a 60 s)
+reaction du gaz a l'eau CO + H2O = CO2 + H2 (Jones-Lindstedt, reversible) ajoutee + craquage du goudron C6H5OH + 5 H2O -> 6 CO + 8 H2 (Boroson 1989, proportionnel a [H2O])
+laminarEDM : s = 1e-12 pour ces reactions (pas d'O2), elles restent bornees par le terme de melange de l'EDM
+arret 60 s apres T2 ; coupe mediane toutes les 300 s ; article ECM, 10/11/2026
