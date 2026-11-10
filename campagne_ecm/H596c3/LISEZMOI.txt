@@ -1,0 +1,4 @@
+H596c3 : debit 596 kg/m2h, couvercle oui, copie de campagne_v11/L596 (etat v1.1 a 60 s)
+constant/fluidZone/chemistryProperties : oxydation du charbon (C+O2->CO2 et C+0.5O2->CO), A x3 : 5.61e9 -> 1.683e10 et 1.4025e13 -> 4.2075e13 (seul changement ; rapport CO/CO2 conserve)
+idee de P. Zuk (visio du 10/11) : chimie trop pauvre, l'air froid l'emporte sur le degagement de chaleur a fort debit ; x3 = borne haute de la plage de calage documentee (x0.3-3)
+test DIAGNOSTIQUE de l'allumage (article ECM, 3.3) ; arret 60 s apres T4 (colonne 6) ou endTime 2000 s ; coupe mediane toutes les 300 s ; 10/11/2026
