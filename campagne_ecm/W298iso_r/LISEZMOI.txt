@@ -1,0 +1,7 @@
+W298iso : debit 298 kg/m2h, couvercle oui, copie de campagne_v11/L298 (etat v1.1 a 60 s)
+refractaire isolant : kappa 1.0 -> 0.15 W/m/K, rho 2050 -> 600 kg/m3, Cv 960 -> 1000 J/kg/K (valeurs typiques de brique isolante, HYPOTHESE) (seul changement)
+ajout : system/coupes (coupe mediane fluide et solide toutes les 300 s, postProcessing/coupeFluide et coupeSolide)
+arret 60 s apres le passage a 600 C de la colonne 4 (T2), comme S_kr05/S_kr2
+article ECM, 09/11/2026
+
+W298iso_r : reprise de W298iso (etat 252.84 s du passage 2, run 42729751194) apres NaN de U dans toutes les mailles a 306.98 s au passage 3 ; seul changement maxCo 0.7 -> 0.5 (10/11/2026)
