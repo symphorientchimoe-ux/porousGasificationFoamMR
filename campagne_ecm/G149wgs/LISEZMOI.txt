@@ -2,3 +2,4 @@ G149wgs : debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.
 reaction du gaz a l'eau CO + H2O = CO2 + H2 (Jones-Lindstedt, reversible) ajoutee (seul changement)
 laminarEDM : s = 1e-12 pour ces reactions (pas d'O2), elles restent bornees par le terme de melange de l'EDM
 arret 60 s apres T2 ; coupe mediane toutes les 300 s ; article ECM, 10/11/2026
+10/11 (ecm4) : maxUa 0.3 -> 3 (en ecm2, critere Ua limitant, dt ~1e-6 s, 0.3-2.2 s simulees/h) ; temoin numerique : R149Lua3

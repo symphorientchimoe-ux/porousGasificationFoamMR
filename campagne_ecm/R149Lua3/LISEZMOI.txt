@@ -1,0 +1,4 @@
+R149Lua3 : TEMOIN numerique des tests gaz (ecm4). Debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s).
+Seul changement par rapport a R149L : maxUa 0.3 -> 3 (meme valeur que G149wgs, G149wgstar, G298wgs, G298wgstar en ecm4).
+But : separer l'effet des reactions gaz de celui du changement de maxUa (comparer a R149L : IFS, Ts aux sondes, gaz).
+arret 60 s apres T2 ; coupe mediane toutes les 300 s ; article ECM, 10/11/2026

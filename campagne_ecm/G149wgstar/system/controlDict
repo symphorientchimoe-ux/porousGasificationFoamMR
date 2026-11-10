@@ -84,7 +84,7 @@ maxRa      5;
 
 maxGa      1.0;   // 2026-09-30 : 0.3 -> 1.0 (critere echauffement gaz ~100 K/pas au lieu de 30) ; mesh5 bloque a dt 7e-5 par Ga. NUMERIQUE ; verifie sur 10 mm (reprise 600 s, comparaison t600 T3=910 s de run2c).
 
-maxUa      0.3;
+maxUa      3;   // 10/11 : 0.3 -> 3, le critere Ua bloquait dt a ~1e-6 s avec les reactions gaz ajoutees (1,2 s simulee/h au passage 1, run 42796905416)
 UaSmall    0.01;      // 2026-09-29 [m/s] plancher de vitesse du critere Ua (defaut solveur 1e-3). Vitesse superficielle d'entree Kim 149 kg/m2h ~0.035 m/s ; air sous la grille 0.2-2 mm/s oscillant (acoustique) -> Ua limitait dt a ~1e-5 s. NUMERIQUE, pas physique.
 
 functions
