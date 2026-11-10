@@ -1,0 +1,4 @@
+H596hv2 : debit 596 kg/m2h, couvercle oui, copie de campagne_v11/L596 (etat v1.1 a 60 s)
+constant/fluidZone/heatTransferProperties : 80.9 -> 161.8
+constant/fluidZone/specieTransferProperties : 0.1375 -> 0.275 (seul changement)
+test de l'hypothese d'allumage (critique 3.3 du rapport) ; arret 60 s apres T4 (colonne 6) ou endTime 2000 s ; coupe mediane toutes les 300 s ; article ECM, 10/11/2026

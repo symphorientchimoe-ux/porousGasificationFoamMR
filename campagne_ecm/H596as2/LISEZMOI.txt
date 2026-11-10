@@ -1,0 +1,4 @@
+H596as2 : debit 596 kg/m2h, couvercle oui, copie de campagne_v11/L596 (etat v1.1 a 60 s)
+constant/fluidZone/radiationProperties : 90.9 -> 181.8
+constant/fluidZone/radiationProperties : 246 -> 492 (seul changement)
+test de l'hypothese d'allumage (critique 3.3 du rapport) ; arret 60 s apres T4 (colonne 6) ou endTime 2000 s ; coupe mediane toutes les 300 s ; article ECM, 10/11/2026
