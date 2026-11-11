@@ -69,6 +69,7 @@ functions
     #include        "sondesNominales"
     #include        "sondesAxe"
     #include        "coupes"
+    #include        "minmaxT"
     probesKim_fluid
     {
         type            probes;
