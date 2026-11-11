@@ -1,0 +1,43 @@
+// 2026-11-09 article ECM : coupe dans le plan median du coin (y = 0), toutes les 300 s, conservee dans postProcessing
+coupeFluide
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    region          fluidZone;
+    writeControl    runTime;
+    writeInterval   300;
+    surfaceFormat   raw;
+    interpolationScheme cell;
+    fields          (Ts T O2 CO porosityF Ychar);
+    surfaces
+    (
+        planMedian
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            pointAndNormalDict { point (0 0 0); normal (0 1 0); }
+            interpolate     false;
+        }
+    );
+}
+coupeSolide
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    region          solidZone;
+    writeControl    runTime;
+    writeInterval   300;
+    surfaceFormat   raw;
+    interpolationScheme cell;
+    fields          (T);
+    surfaces
+    (
+        planMedian
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            pointAndNormalDict { point (0 0 0); normal (0 1 0); }
+            interpolate     false;
+        }
+    );
+}

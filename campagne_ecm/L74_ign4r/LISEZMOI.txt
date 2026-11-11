@@ -1,0 +1,3 @@
+L74_ign4r (11/11/2026) : débit 74,5 kg/m2h AVEC COUVERCLE, allumeur de 40 mm. État à 60 s de O74_ign4r, couvercle posé à 60 s (poser_couvercle_cas.sh, même suite que construire.py), igniterZone refait par topoSet.
+Complète L149_ign4r et L596_ign4r. Étape 2a (60-65 s) en local, suite sur GitHub.
+Suite sur GitHub (11/11/2026) : depart de l'instant 65 s calcule en local (etapes 1 et 2a), maxUa 0.3, allumeur 1000 K jusqu'a 300 s, arret colonne 4 de probesKim_fluid + 60 s.
