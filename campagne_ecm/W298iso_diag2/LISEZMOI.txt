@@ -1,0 +1,8 @@
+W298iso_diag (11/11/2026) : diagnostic du NaN de W298iso. Rejeu DETERMINISTE du passage 3 (etat 252.84 s du passage 2, run 42729751194),
+memes reglages que W298iso (maxCo 0.7 ; seule difference avec W298iso_r : maxCo revenu de 0.5 a 0.7).
+Verifie en local le 11/11 : le rejeu reproduit le journal GitHub du passage 3 chiffre pour chiffre.
+Ajouts sans effet sur le pas de temps : system/fenetreNaN (writeObjects tous les 2 pas entre 306.85 et 307.05 s), endTime 307.05.
+But : trouver la maille ou la pression saute (rho max 1.17 -> 4.20 kg/m3) juste avant le NaN de U.
+W298iso_diag2 (11/11/2026 soir) : le rejeu W298iso_diag (run 43049392842) a reproduit le NaN a 306.9777 s, mais l'archive ne garde que le dernier
+instant (ecritures fines perdues) et le plafond de 400 alertes DBG2 etait epuise des 252.9 s (jet de 52 m/s a la sortie, maille d'axe z 0.695).
+Ici : fieldMinMax (rho, p, T, U, avec position) a chaque pas apres 306.5 s, dans postProcessing (archive). Rien d'autre ne change.

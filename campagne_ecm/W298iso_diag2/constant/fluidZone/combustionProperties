@@ -1,0 +1,46 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      combustionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+combustionModel  laminarEDM<psiReactionThermo>;
+
+active           true;
+
+// Test 56 (2026-09-25) : EDM laminaire (Magnussen & Hjertager 1977),
+// R = min(R_Arrhenius, A*rho*|S|*min(Yf, YO2/s, B*YP/(1+s))), |S| taux de
+// deformation resolu a la place de epsilon/k (cas laminaire). A=4, B=0.5
+// valeurs standard non ajustees. s = rapport massique O2/combustible
+// stoechiometrique. Voir porousGasificationFoamMR/laminarEDM.H.
+laminarEDMCoeffs
+{
+    A        4;
+    B        0.5;
+    oxidant  O2;
+    reactions
+    (
+        COoxidation  { fuel CO;  s 0.5714; products (CO2); }      // 0.5*32/28.01
+        H2oxidation  { fuel H2;  s 7.937;  products (H2O); }      // 0.5*32/2.016
+        CH4oxidation { fuel CH4; s 0.9975; products (CO H2); }   // Test 82 : 0.5*32/16.04 (oxydation partielle Meng R3)
+        TARoxidation { fuel C6H5OH; s 1.3600; products (CO H2O); }   // Kim 2016 (2026-09-29) : 4*31.998/94.114 (C6H6O + 4 O2 = 6 CO + 3 H2O). MEME ORDRE que reactions{} de chemistryProperties (4e reaction)
+    );
+}
+
+
+laminarCoeffs
+{
+}
+
+// ************************************************************************* //

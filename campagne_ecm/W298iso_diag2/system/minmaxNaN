@@ -1,0 +1,15 @@
+// W298iso_diag2 : position du min/max de rho (continuite), p, T et U a chaque pas, de 306.5 s a la fin
+minmaxNaN
+{
+    type            fieldMinMax;
+    libs            ("libfieldFunctionObjects.so");
+    region          fluidZone;
+    fields          (rho p T U);
+    mode            magnitude;
+    location        true;
+    writeToFile     true;
+    log             false;
+    writeControl    timeStep;
+    writeInterval   1;
+    timeStart       306.5;
+}
