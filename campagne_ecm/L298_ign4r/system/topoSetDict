@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Meme principe que test99 (v4, 2026-09-09) : regroupe les cellZones de
+// blockMesh (plenum, biomass_bed, gas_zone = ciel gazeux, refractory) en deux
+// ensembles pour splitMeshRegions : fluidZone (ecoulement reactif poreux) et
+// solidZone (garnissage refractaire 50 mm, Kim 2016 sect. 2.2, conduction pure).
+
+actions
+(
+    { name fluidZone; type cellSet; action new; source zoneToCell; sourceInfo { name plenum; } }
+    { name fluidZone; type cellSet; action add; source zoneToCell; sourceInfo { name biomass_bed; } }
+    { name fluidZone; type cellSet; action add; source zoneToCell; sourceInfo { name gas_zone; } }
+    { name solidZone; type cellSet; action new; source zoneToCell; sourceInfo { name refractory; } }
+);
+
+// ************************************************************************* //
