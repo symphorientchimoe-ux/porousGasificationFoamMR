@@ -1,0 +1,13 @@
+// W298iso_diag (11/11/2026) : ecriture fine dans la fenetre du NaN (306.98 s au passage 3), SANS toucher au pas de temps
+// (writeControl timeStep, pas adjustableRunTime). Champs de la region fluide seulement.
+fenetreNaN
+{
+    type            writeObjects;
+    libs            ("libutilityFunctionObjects.so");
+    region          fluidZone;
+    objects         (U p p_thermo T Ts porosityF phi Df G qr O2 CO CO2 H2O H2 heatTransfer Srho thermo:rho rho);
+    writeControl    timeStep;
+    writeInterval   2;
+    timeStart       306.85;
+    timeEnd         307.05;
+}
