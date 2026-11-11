@@ -1,0 +1,5 @@
+L596_ign4r (11/11/2026) : débit 596 kg/m2h AVEC COUVERCLE (comme l'expérience et les cas de référence R149L, W*), allumeur de 40 mm (z 0,360-0,400).
+État à 60 s de O596_ign4r (allumeur 40 mm dès t = 0, 800 K), couvercle posé à 60 s par poser_couvercle.py (même méthode que construire.py), igniterZone refait par topoSet.
+But (article ECM) : allumage à 596 avec couvercle ; à 149, comparaison directe avec R149L (allumeur 10 mm, 3,27 mm/min).
+Étape 2a (60-65 s, maxUa 3) en local, suite sur GitHub.
+Suite sur GitHub (11/11/2026) : depart de l'instant 65 s calcule en local (etapes 1 et 2a), maxUa 0.3, allumeur 1000 K jusqu'a 300 s, arret colonne 6 de probesKim_fluid + 60 s.
