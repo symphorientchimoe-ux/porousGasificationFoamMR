@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       volScalarField;
+    location    "65/fluidZone";
+    object      qr;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 0 -3 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            calculated;
+        value           uniform -0;
+    }
+    outlet
+    {
+        type            calculated;
+        value           nonuniform List<scalar> 
+0
+;
+    }
+    back
+    {
+        type            wedge;
+    }
+    front
+    {
+        type            wedge;
+    }
+    fluidZone_to_solidZone
+    {
+        type            calculated;
+        value           nonuniform List<scalar> 
+52
+(¾Ô\ÙIŞ?˜æÙ6ı-Ş?]}a'Ş?bñ$Q3Ş?tÌørÏFŞ?\; ZŞ?\ñ–^jŞ?bÆítŞ?ôÇ}ò•zŞ?ÏWˆêèŞ?æo.ºß…Ş?ı2k÷‰Ş?ø5wŞ?•¤nÚ&‰Ş?8í óÉÙ?D¯„ËÙ?îåş¼8Ô?·\6×øÒÏ?øèZJÿ?Ì?èÔöt-Ğ?êW(83U×?#²Ñ+Bá?>G±æ?‡…ƒjŒ›é?õdî:jë?ïßäëHì?üğ»Kì?# ˆì?yr	í?İEËïßí?4cTï?¼Õı.VPğ?óBÉàãñ?¾(ù¼Ñ£Ö?„TFœbGÚ?'íÆÖ?ì-Ô][ÖÑ?¤Ïy'@Í?©W–Ä(Í?NXÀËÓ?®CäŠ›Ü?ñæ¨X“Ãã?ô¬‘è?²Úò¨²ê? Hu‹Øë?V°Ú5ì?`ÿ
+9dì?ŠÖïY³¾ì?œJ2æií?°ÛÈlEkî?ÄÆï?#v_Øğ?);
+    }
+    procBoundary0to1
+    {
+        type            processor;
+        value           uniform 0;
+    }
+}
+
+
+// ************************************************************************* //

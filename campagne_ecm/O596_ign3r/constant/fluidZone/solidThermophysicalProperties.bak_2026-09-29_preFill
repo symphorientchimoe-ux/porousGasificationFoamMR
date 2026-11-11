@@ -1,0 +1,93 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    object      solidThermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Kim 2016, granules de bois. Meme structure que test99 (5 composants).
+// Les proprietes du solide (k, Cp, masse volumique INTRINSEQUE de chaque
+// composant) ne sont PAS dans Kim 2016 -> placeholders. Rappel test78 : la
+// masse du lit = somme(rho_i Y_i)(1-eps) doit redonner la masse chargee ;
+// Kim 2016 sect. 2.2 : 15-17 kg pour 300 mm de lit (Ø 300 mm) -- valeur
+// donnee sans distinction sludge/bois, a recouper dans data/.
+// Hf de la cendre (-12.38e6 dans test99) : heritage du tutoriel, sans effet
+// (cendre inerte) -- conserve.
+
+thermoType solidMixtureThermo<constHeterogeneous>;
+
+solidComponents
+(
+  moisture fuel char ash refractory
+);
+
+moistureCoeffs
+{
+    // eau liquide : proprietes generiques (identiques test99)
+    transport      { K 0.6; }
+    thermodynamics { Cp 4186; Hf 0; }
+    density        { rho 1000; }
+};
+
+// Kim 2016 (2026-09-29, schema pyrolyse bois ../data/pyrolysis_scheme_wood.md sect. 6) :
+// fuel = bois SEC SANS CENDRE du granule (Yfuel = 0.9184 brut) ; char = carbone pur forme
+// par la pyrolyse (Ychar0 = 0). Le solveur melange les masses volumiques en HARMONIQUE
+// (1/rho = sum Y_i/rho_i, volPyrolysis.C collapseBed) et fait evoluer la porosite par
+// d(eps)/dt = -sum RRs_i/rho_i (ODESolidHeterogeneousChemistryModel::RRpor) : rho_i est
+// donc la masse volumique "enveloppe" du composant DANS le granule.
+fuelCoeffs
+{
+    // k = 0.17 W/m/K (0.146-0.192) : Guo W. et al. 2013 Fuel 103:347, doi:10.1016/j.fuel.2012.08.037
+    //     (extrait de resume seulement -- NON VERIFIE en texte integral ; granule ou vrac ?).
+    // Cp = 1500 J/kg/K constant : Gupta, Yang & Roy 2003 Fuel 82:919 (resume verifie) donne
+    //     1172 -> 1726 J/kg/K de 313 a 413 K (resineux) ; 1500 ~ valeur a ~360 K retenue par
+    //     model_properties_woodpellet.md (le modele const<...> n'accepte pas Cp(T)).
+    // rho = 1220 kg/m3 : DERIVE de rho_granule brut = 1200 kg/m3 (model_properties ligne 2,
+    //     NON VERIFIE, 1100-1300) par 1/1200 = 0.0799/1000 + 0.9184/rho_fuel + 0.0017/rho_ash
+    //     (rho_ash 650 : 1223 ; 2000 : 1220 -> insensible). A refaire si rho_granule change.
+    transport      { K   0.17; }
+    thermodynamics { Cp  1500; Hf 0; }
+    density        { rho 1220; }
+};
+
+charCoeffs
+{
+    // k = 0.15 W/m/K : Hankalin 2009 eq. 18 (VERIFIE-PROJ, identique test99).
+    // Cp = 1650 J/kg/K (moyenne 600-1100 K) : Hankalin 2009 eq. 9 / Gronli 1996 (VERIFIE-PROJ).
+    // rho : NON TRANCHE (model_properties ligne 5 "[[TO DETERMINE]]"). Avec Yc = 0.20 :
+    //     rho_char = Yc * rho_fuel / s_v = 244 / s_v kg/m3 (s_v = fraction de volume du
+    //     granule conservee a la pyrolyse). s_v = 1 (244, pas de retrait : le tassement du lit
+    //     est laisse a bedCollapse) ; s_v = 0.5-0.8 -> 305-488 (retrait interne du granule,
+    //     porosite du lit en hausse puis bedCollapse). Pas de mesure de retrait chez Kim.
+    //     Si Yc = 0.25 : 305 / s_v. DECISION UTILISATEUR (couplee a shrinkA de bedCollapse).
+    transport      { K   0.15; }
+    thermodynamics { Cp  1650; Hf 0; }
+    density        { rho [[FROM data/model_properties_woodpellet.md]]; }   // cle : rho char [kg/m3] -- voir options ci-dessus (244/s_v)
+};
+
+ashCoeffs
+{
+    transport      { K   [[FROM data/model_properties_woodpellet.md]]; }   // cle : k cendre [W/m/K]
+    thermodynamics { Cp  [[FROM data/model_properties_woodpellet.md]]; Hf -12.38e6; }   // cle : Cp cendre [J/kg/K]
+    density        { rho [[FROM data/model_properties_woodpellet.md]]; }   // cle : rho cendre [kg/m3] -- DOIT etre = ashDensity (pyrolysisProperties)
+};
+
+refractoryCoeffs
+{
+    // Composant INUTILISE dans fluidZone (Yrefractory = 0 partout ; le
+    // garnissage est la region solidZone). Valeurs test99 conservees pour
+    // que le melange reste bien defini.
+    transport      { K 0.001; }
+    thermodynamics { Cp 900; Hf 0; }
+    density        { rho 955; }
+};
+
+// ************************************************************************* //

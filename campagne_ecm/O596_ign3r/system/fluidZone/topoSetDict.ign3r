@@ -1,0 +1,6 @@
+FoamFile { version 2.0; format ascii; class dictionary; object topoSetDict; }
+// 2026-11-04 essai L596_ign2r : allumeur sur 2 rangees (z 0.380-0.400) au lieu d'une (0.390-0.400)
+actions
+(
+    { name igniterZone; type cellSet; action new; source boxToCell; sourceInfo { box (-0.001 -0.02 0.370) (0.151 0.02 0.400); } }
+);
