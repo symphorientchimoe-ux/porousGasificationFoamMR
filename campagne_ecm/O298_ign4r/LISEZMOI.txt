@@ -1,0 +1,5 @@
+O298_ign4r (11/11/2026) : allumeur de 40 mm (z 0,360-0,400, 4 rangées) dès t = 0, ciel ouvert, débit 298 kg/m2h.
+Copie de O596_ign4r (même maillage, même t = 0) ; seul changement : massFlowRate de l'entrée.
+But (article ECM) : vérifier que l'allumeur de 40 mm, qui allume à 596, ne change pas la vitesse de front aux débits nominaux
+(sinon la comparaison 596 / débits nominaux n'est pas homogène et il faut recaler). Étapes 0-65 s en local (reprise.sh), suite sur GitHub.
+Suite sur GitHub (11/11/2026) : depart de l'instant 65 s calcule en local (etapes 1 et 2a), maxUa 0.3, allumeur 1000 K jusqu'a 300 s, arret colonne 4 de probesKim_fluid + 60 s.
