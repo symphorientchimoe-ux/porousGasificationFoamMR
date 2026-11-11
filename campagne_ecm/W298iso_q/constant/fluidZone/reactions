@@ -1,0 +1,30 @@
+// v5 : especes gaz etendues (CO2/H2/CH4/H2O, produits de la
+// devolatilisation et de l'oxydation partielle/Boudouard/gaz-a-l'eau du
+// mecanisme solide).
+// v6 (2026-09-10) : la cinetique gaz homogene reelle vit dans
+// constant/chemistryProperties (sous-dictionnaire reactions{}) -- c'est
+// LA que le lecteur de chimie (BasicChemistryModel) la cherche, pas ici
+// (verifie apres un FOAM FATAL IO ERROR en essayant de la mettre ici
+// d'abord). Ce fichier ne sert que pour la liste d'especes ; reactions()
+// reste vide.
+// Refr (espece traceur gaz, v3) retiree (2026-09-11) : ne servait qu'a
+// eviter Yt=0 dans une cellZone "refractory" DANS fluidZone -- cette zone
+// n'existe plus la depuis le passage multi-region (v4, deplacee dans
+// solidZone, qui n'a pas de champs de fraction massique gazeuse du tout).
+// Le probleme qu'elle resolvait ne peut donc plus se produire. Voir
+// SUIVI_MAILLAGEREEL_V6.md.
+species
+(
+    CO
+    N2
+    O2
+    CO2
+    H2
+    CH4
+    H2O
+    C6H5OH      // Kim 2016 (2026-09-29) : goudron (phenol), DERNIER (meme ordre que thermo.compressibleGas et chemistryProperties)
+);
+
+reactions
+(
+);

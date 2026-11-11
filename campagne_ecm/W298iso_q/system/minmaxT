@@ -1,0 +1,14 @@
+// W298iso_q : suivi de T et rho (min/max avec position, faces de bord comprises) tous les 50 pas
+minmaxT
+{
+    type            fieldMinMax;
+    libs            ("libfieldFunctionObjects.so");
+    region          fluidZone;
+    fields          (T rho);
+    mode            magnitude;
+    location        true;
+    writeToFile     true;
+    log             false;
+    writeControl    timeStep;
+    writeInterval   50;
+}
