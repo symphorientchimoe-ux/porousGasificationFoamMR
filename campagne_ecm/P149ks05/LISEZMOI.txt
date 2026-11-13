@@ -1,0 +1,4 @@
+P149ks05 (13/11/2026) : sensibilite demandee par le relecteur (article ECM), debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s), maxUa 0.3.
+Seul changement : conductivite du solide du lit (humidite, bois, charbon, cendre) x0.5.
+Les 60 premieres secondes (etat de depart) ont ete calculees avec la valeur de reference.
+Reference : R149L (IFS 3.22, BR 123.7). Arret 60 s apres T2 (colonne 4).

@@ -1,0 +1,4 @@
+P149yc18 (13/11/2026) : sensibilite demandee par le relecteur (article ECM), debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s), maxUa 0.3.
+Seul changement : rendement en charbon 20 -> 18 kg/100 kg de bois sec, ecart pris sur le goudron (C6H5OH <-> 6 C + H2O + 2 H2, bilan C/H/O conserve).
+Les 60 premieres secondes (etat de depart) ont ete calculees avec la valeur de reference.
+Reference : R149L (IFS 3.22, BR 123.7). Arret 60 s apres T2 (colonne 4).

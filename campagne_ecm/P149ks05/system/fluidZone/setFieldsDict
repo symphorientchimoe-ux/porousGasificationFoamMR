@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/fluidZone";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Etat initial du lit de granules de bois, Kim et al. 2016.
+// Demarrage a froid T = Ts = 300 K partout (comme test93/99) ; l'allumage au
+// kerosene est represente par l'allumeur maintenu (igniterZone,
+// pyrolysisProperties), PAS par une boite chaude en condition initiale.
+//
+// Composition du solide (fractions massiques, base "tel que recu") :
+// Kim 2016, Table 1, colonne "Wood pellet", analyse immediate :
+//   humidite 7.99 %, matieres volatiles 78.37 %, carbone fixe 13.47 %,
+//   cendre 0.17 %  (somme = 100.00 %).
+// Correspondance modele (convention test18/test99) : Ymoisture = humidite,
+// Yfuel = matieres volatiles, Ychar = carbone fixe, Yash = cendre.
+// -> A CONFIRMER contre data/model_properties_woodpellet.md (si l'agent
+//    "proprietes" retient une autre base ou une autre repartition, c'est
+//    lui qui fait foi).
+// 2026-09-29 (schema pyrolyse bois, data/pyrolysis_scheme_wood.md) : CORRIGE.
+//    La convention MV->fuel / CF->char de test99 (biochar) ne vaut pas pour le
+//    bois : le char est FORME par la pyrolyse (100 fuel = 20 char + gaz), donc
+//    fuel = bois sec sans cendre = 1 - 0.0799 - 0.0017 = 0.9184 et Ychar = 0
+//    (model_properties_woodpellet.md sect. 6). Garder Ychar = CF compterait le
+//    carbone fixe deux fois.
+//
+// Porosite du lit : NON donnee par Kim 2016 (seule la masse 15-17 kg pour
+// 300 mm est donnee, sect. 2.2, sans distinguer les deux combustibles).
+
+// 2026-09-29 (remplissage) : eps0 = 1 - rho_vrac/rho_granule = 1 - 740/1200 = 0.383 -> 0.38
+//   rho_vrac 740 kg/m3 : DERIVE de Kim 2016 (15-17 kg dans 0.02121 m3 ; IR/IFS -> 762 ;
+//     BR/masse -> 722), data/experiment_setup.md sect. 5, model_properties ligne 1.
+//   rho_granule 1200 kg/m3 : NON VERIFIE (extraits de moteur de recherche 1100-1300 ;
+//     Rhen et al. 2005 a lire), model_properties ligne 2. Plage eps 0.33-0.43.
+//   Controle : 1200*(1-0.38) = 744 kg/m3 de lit -> 15.8 kg pour 0.02121 m3 (Kim : 15-17 kg).
+bedPorosity     0.38;   // model_properties_woodpellet.md ligne 3 (DERIVE ; rho_granule NON VERIFIE)
+
+defaultFieldValues
+(
+    volScalarFieldValue Ts          300
+    volScalarFieldValue porosityF   1
+    volScalarFieldValue porosityF0  1
+    volScalarFieldValue Ymoisture   0
+    volScalarFieldValue Yfuel       0
+    volScalarFieldValue Ychar       0
+    volScalarFieldValue Yash        0
+);
+
+regions
+(
+    zoneToCell
+    {
+        name    biomass_bed;
+        fieldValues
+        (
+            volScalarFieldValue porosityF   $bedPorosity
+            volScalarFieldValue porosityF0  $bedPorosity
+            volScalarFieldValue Ymoisture   0.0799    // Kim 2016 Table 1
+            volScalarFieldValue Yfuel       0.9184    // bois sec sans cendre = 1 - 0.0799 - 0.0017 (Kim 2016 Table 1) ; 2026-09-29, etait 0.7837 (MV)
+            volScalarFieldValue Ychar       0         // char forme par la pyrolyse ; 2026-09-29, etait 0.1347 (CF)
+            volScalarFieldValue Yash        0.0017    // Kim 2016 Table 1
+        );
+    }
+);
+
+// ************************************************************************* //
