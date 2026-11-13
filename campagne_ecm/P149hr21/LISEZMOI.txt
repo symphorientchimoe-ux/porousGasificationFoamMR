@@ -1,0 +1,6 @@
+P149hr21 (13/11/2026) : DIAGNOSTIC pyrolyse, debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s), maxUa 0.3.
+Seul changement : chaleur de pyrolyse +4.2e5 -> +2.1e5 J/kg (moitie, toujours endothermique).
+Les 60 premieres secondes (etat de depart) ont ete calculees avec l'ancienne valeur.
+But : savoir si une pyrolyse moins endothermique rechauffe la couche de charbon et change la part brulee dans le front.
+Ce n'est pas un recalage : diagnostic pour orienter le lot 5 (pyrolyse). Reference : R149L (IFS 3.22, BR 123.7).
+Arret 60 s apres T2 (colonne 4).

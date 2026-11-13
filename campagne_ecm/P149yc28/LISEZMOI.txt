@@ -1,0 +1,7 @@
+P149yc28 (13/11/2026) : DIAGNOSTIC pyrolyse, debit 149 kg/m2h, couvercle oui, copie de campagne_v11/R149L (etat v1.1 a 60 s), maxUa 0.3.
+Seul changement : rendement en charbon de la pyrolyse 20 -> 28 kg/100 kg de bois sec, les 8 kg pris au goudron selon
+C6H5OH -> 6 C + H2O + 2 H2 (bilan C/H/O conserve) : 28 char + 10.13 CO + 19.24 CO2 + 1.388 H2 + 1.67 CH4 + 27.17 H2O + 12.403 C6H5OH.
+Les 60 premieres secondes (etat de depart) ont ete calculees avec l'ancien partage.
+But : savoir si un rendement en charbon plus eleve corrige les deux erreurs du modele (BR/IR 0.89 contre 0.69 mesure ; couche de charbon 100-200 K trop froide).
+Ce n'est pas un recalage : diagnostic pour orienter le lot 5 (pyrolyse) de la feuille de route. Reference : R149L (IFS 3.22, BR 123.7).
+Arret 60 s apres T2 (colonne 4).
