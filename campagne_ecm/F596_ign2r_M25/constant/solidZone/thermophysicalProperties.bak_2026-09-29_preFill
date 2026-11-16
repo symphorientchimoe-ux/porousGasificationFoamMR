@@ -1,0 +1,56 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/solidZone";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Garnissage refractaire 50 mm du reacteur de Kim 2016 (sect. 2.2 : "had a
+// refractory lining (thickness 50 mm)"). Nature, masse volumique, Cp et
+// conductivite du refractaire : NON DONNES -> placeholders (meme modele
+// heSolidThermo/constIso que test99 ; test99 = geopolymere 955 / 900 / 0.53).
+// NB : l'inertie thermique du refractaire compte sur 2-4 h d'essai
+// (diffusivite ~5e-7 m2/s -> penetration ~ sqrt(a t) ~ 6 cm en 2 h).
+
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          eConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight       100;
+    }
+    equationOfState
+    {
+        rho             [[FROM data/model_properties_woodpellet.md]];   // cle : rho refractaire [kg/m3]
+    }
+    thermodynamics
+    {
+        Hf              0;
+        Cv              [[FROM data/model_properties_woodpellet.md]];   // cle : Cp refractaire [J/kg/K]
+    }
+    transport
+    {
+        kappa           [[FROM data/model_properties_woodpellet.md]];   // cle : k refractaire [W/m/K]
+    }
+}
+
+// ************************************************************************* //

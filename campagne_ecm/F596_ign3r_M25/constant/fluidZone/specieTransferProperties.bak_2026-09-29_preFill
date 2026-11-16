@@ -1,0 +1,26 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    object      specieTransferProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Transfert de masse gaz-char (constST, comme test99 ; test87 : h 0.06 m/s,
+// Wakao & Funazkri 1978 pour dp = 49 mm). A recalculer pour le granule de bois.
+specieTransferModel constST;
+
+Parameters
+{
+  h        [[FROM data/model_properties_woodpellet.md]];   // cle : coefficient de transfert de masse [m/s]
+  SAV      [[FROM data/model_properties_woodpellet.md]];   // cle : meme SAV que heatTransferProperties [1/m]
+}
+
+// ************************************************************************* //

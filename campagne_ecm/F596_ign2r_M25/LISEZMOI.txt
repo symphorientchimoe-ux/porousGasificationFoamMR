@@ -1,0 +1,7 @@
+F596_ign2r_M25 (16/11/2026) : verification de maillage demandee par le relecteur (article ECM, rapport 3, point 3.6).
+Allumage a 596 kg/m2h, ciel ouvert, maillage M25 (2,5 mm en z dans le lit et le refractaire, 10 mm en r), allumeur de 20 mm
+(boite z 0.380-0.400, 8 rangees x 15 colonnes) des t = 0. Cas a 5 mm correspondant : O596_ign2r.
+Construction : validation_Kim2016/campagne_v11/allumage/construire_F596_M25.sh (maillage et system de base_149_M25, champs a t = 0
+de base_596 par mapFields mapNearest, debit 596, coefficients de transfert de 596).
+Etapes 0-65 s en local (demarrer_F596_M25.sh : 800 K jusqu a 60 s, puis 1000 K, maxUa 3). Suite sur GitHub : 1000 K jusqu a 300 s,
+maxUa 0.3, arret 60 s apres T4 (colonne 6) ou a 1500 s si le lit ne s allume pas.
