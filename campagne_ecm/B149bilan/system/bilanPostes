@@ -1,0 +1,152 @@
+// 16/11/2026 article ECM (rapport 3, point 3.3) : bilan d'energie par poste.
+// Les flux sont integres a CHAQUE pas (somme flux*dt) et la moyenne de chaque seconde simulee est ecrite
+// dans postProcessing/bilanPostes/<temps de depart>/{fluide,solide}.dat (une ligne par seconde, quel que soit dt).
+// Une reprise rouvre un nouveau fichier (dossier du temps de depart) : les lignes se recollent par le temps.
+// fluide.dat : t  duree  phi_in  Ha_in  phi_out  Ha_out  Hs_out  mCO  mH2  mCH4  mC6H5OH  mCO2  mH2O  mO2
+//   (moyennes sur la duree ; phi en kg/s, phi_in < 0 ; H en W, enthalpie absolue ha ou sensible hs ; m_i = flux massique sortant de l'espece i)
+// solide.dat : t  duree  q_paroi   (W, flux conductif a outerWall du refractaire, signe de snGrad : < 0 = perte)
+    bilanPostesFluide
+    {
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            bilanPostesFluide;
+        region          fluidZone;
+        writeControl    timeStep;
+        writeInterval   1;
+        codeInclude
+        #{
+            #include "basicThermo.H"
+            #include "OFstream.H"
+        #};
+        codeOptions
+        #{
+            -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+            -I$(LIB_SRC)/finiteVolume/lnInclude \
+            -I$(LIB_SRC)/meshTools/lnInclude
+        #};
+        codeData
+        #{
+            scalar tDebut_ = -1;
+            scalar duree_ = 0;
+            List<scalar> acc_;
+            autoPtr<OFstream> os_;
+        #};
+        codeExecute
+        #{
+            const fvMesh& m = refCast<const fvMesh>(obr_);
+            const scalar t = m.time().value();
+            const scalar dt = m.time().deltaTValue();
+            const volScalarField& T = m.lookupObject<volScalarField>("T");
+            const surfaceScalarField& phi = m.lookupObject<surfaceScalarField>("phi");
+            const basicThermo& th = m.lookupObject<basicThermo>(basicThermo::dictName);
+            const label pin = m.boundaryMesh().findPatchID("inlet");
+            const label pout = m.boundaryMesh().findPatchID("outlet");
+            const scalarField& phin = phi.boundaryField()[pin];
+            const scalarField& phout = phi.boundaryField()[pout];
+            const scalarField hain(th.ha(T.boundaryField()[pin], pin));
+            const scalarField haout(th.ha(T.boundaryField()[pout], pout));
+            const scalarField hsout(th.hs(T.boundaryField()[pout], pout));
+            const wordList esp({"CO", "H2", "CH4", "C6H5OH", "CO2", "H2O", "O2"});
+            FixedList<scalar, 12> f;
+            f[0] = gSum(phin);
+            f[1] = gSum(phin*hain);
+            f[2] = gSum(phout);
+            f[3] = gSum(phout*haout);
+            f[4] = gSum(phout*hsout);
+            forAll(esp, i)
+            {
+                const volScalarField& Y = m.lookupObject<volScalarField>(esp[i]);
+                f[5 + i] = gSum(phout*Y.boundaryField()[pout]);
+            }
+            if (tDebut_ < 0)
+            {
+                tDebut_ = t - dt;
+                if (Pstream::master())
+                {
+                    const fileName d(m.time().rootPath()/m.time().globalCaseName()/"postProcessing"/"bilanPostes"/m.time().timeName(tDebut_));
+                    mkDir(d);
+                    os_.reset(new OFstream(d/"fluide.dat"));
+                    os_().precision(12);
+                    os_() << "# t duree phi_in Ha_in phi_out Ha_out Hs_out mCO mH2 mCH4 mC6H5OH mCO2 mH2O mO2" << endl;
+                }
+            }
+            if (acc_.size() != 12) { acc_.setSize(12, 0.0); }
+            forAll(f, i) { acc_[i] += f[i]*dt; }
+            duree_ += dt;
+            if (duree_ >= 1.0 - 1e-9)
+            {
+                if (Pstream::master())
+                {
+                    os_() << t << " " << duree_;
+                    forAll(acc_, i) { os_() << " " << acc_[i]/duree_; }
+                    os_() << endl;
+                }
+                acc_ = 0.0;
+                duree_ = 0;
+            }
+        #};
+    }
+    bilanPostesSolide
+    {
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            bilanPostesSolide;
+        region          solidZone;
+        writeControl    timeStep;
+        writeInterval   1;
+        codeInclude
+        #{
+            #include "basicThermo.H"
+            #include "OFstream.H"
+        #};
+        codeOptions
+        #{
+            -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+            -I$(LIB_SRC)/finiteVolume/lnInclude \
+            -I$(LIB_SRC)/meshTools/lnInclude
+        #};
+        codeData
+        #{
+            scalar tDebut_ = -1;
+            scalar duree_ = 0;
+            scalar acc_ = 0;
+            autoPtr<OFstream> os_;
+        #};
+        codeExecute
+        #{
+            const fvMesh& m = refCast<const fvMesh>(obr_);
+            const scalar t = m.time().value();
+            const scalar dt = m.time().deltaTValue();
+            const volScalarField& T = m.lookupObject<volScalarField>("T");
+            const basicThermo& th = m.lookupObject<basicThermo>(basicThermo::dictName);
+            const label pw = m.boundaryMesh().findPatchID("outerWall");
+            const tmp<volScalarField> tk(th.kappa());
+            const scalar q = gSum
+            (
+                tk().boundaryField()[pw]*T.boundaryField()[pw].snGrad()*m.magSf().boundaryField()[pw]
+            );
+            if (tDebut_ < 0)
+            {
+                tDebut_ = t - dt;
+                if (Pstream::master())
+                {
+                    const fileName d(m.time().rootPath()/m.time().globalCaseName()/"postProcessing"/"bilanPostes"/m.time().timeName(tDebut_));
+                    mkDir(d);
+                    os_.reset(new OFstream(d/"solide.dat"));
+                    os_().precision(12);
+                    os_() << "# t duree q_paroi" << endl;
+                }
+            }
+            acc_ += q*dt;
+            duree_ += dt;
+            if (duree_ >= 1.0 - 1e-9)
+            {
+                if (Pstream::master())
+                {
+                    os_() << t << " " << duree_ << " " << acc_/duree_ << endl;
+                }
+                acc_ = 0;
+                duree_ = 0;
+            }
+        #};
+    }
