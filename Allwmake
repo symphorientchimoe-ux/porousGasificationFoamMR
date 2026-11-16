@@ -11,5 +11,6 @@ set -e
 (cd $FOAM_HGS/radiationModels && wmake libso)
 (cd $FOAM_HGS/thermophysicalModels && ./Allwmake)
 (cd $FOAM_HGS/pyrolysisModels && wmake libso)
+(cd $FOAM_HGS/functionObjects/bilanPostes && wmake libso)   # 16/11/2026 article ECM : bilan d energie par poste (functionObject, sans effet sur le solveur)
 (cd applications/solvers/porousGasificationFoamMR && wmake)
 echo "porousGasificationFoamMR built: $FOAM_USER_APPBIN/porousGasificationFoamMR"

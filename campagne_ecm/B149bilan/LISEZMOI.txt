@@ -1,7 +1,7 @@
 B149bilan (16/11/2026) : bilan d'energie transitoire par poste demande par le relecteur (article ECM, rapport 3, point 3.3).
 Copie de campagne_v11/R149L (etat v1.1 a 60 s, couvercle, 149 kg/m2h, maxUa 0.3), sans aucun changement physique
 (chemistryProperties remis a la valeur de R149L : 20 kg de charbon pour 100 kg de bois sec).
-Seul ajout : system/bilanPostes (deux functionObjects coded) qui integrent a chaque pas les flux d'entree/sortie
+Seul ajout : system/bilanPostes (deux functionObjects de la bibliotheque libbilanPostes, src/porousGasificationMedia/functionObjects/bilanPostes ; les functionObjects coded du premier essai sont refuses en root dans le conteneur) qui integrent a chaque pas les flux d'entree/sortie
 (debit, enthalpie absolue et sensible, flux massique sortant de CO, H2, CH4, C6H5OH, CO2, H2O, O2) et la perte
 par la paroi exterieure du refractaire, et ecrivent leur moyenne sur chaque seconde simulee dans
 postProcessing/bilanPostes/<temps de depart>/fluide.dat et solide.dat (teste en local le 16/11 : compile et ecrit).

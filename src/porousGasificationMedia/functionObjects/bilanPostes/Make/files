@@ -1,0 +1,3 @@
+bilanPostes.C
+
+LIB = $(FOAM_USER_LIBBIN)/libbilanPostes
