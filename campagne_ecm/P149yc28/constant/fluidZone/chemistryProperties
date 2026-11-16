@@ -332,7 +332,7 @@ solidReactions
     // Ordre des gaz de la ligne sans importance pour le parseur ; ordre des LISTES d'especes
     // en revanche impose (voir 'species' ci-dessus).
     irreversibleSolidArrheniusHeterogeneousReaction
-    100 fuel = 28 char + 10.13 CO + 19.24 CO2 + 1.388 H2 + 1.67 CH4 + 27.17 H2O + 12.403 C6H5OH   // 13/11/2026 DIAGNOSTIC P149yc28 : charbon 20 -> 28 kg, pris au goudron (C6H5OH -> 6C + H2O + 2H2, bilan C/H/O conserve)
+    100 fuel = 28 char + 10.13 CO + 19.24 CO2 + 1.388 H2 + 1.67 CH4 + 27.17 H2O + 12.402 C6H5OH   // 16/11/2026 goudron 12.403 -> 12.402 (somme 100.001 -> 100.000) ; 13/11/2026 DIAGNOSTIC P149yc28 : charbon 20 -> 28 kg, pris au goudron (C6H5OH -> 6C + H2O + 2H2, bilan C/H/O conserve)
     (4.4e9 16982 300 4.2e5 1.0)   // 2026-09-30 SENSIBILITE DECLAREE (seul changement vs run2c) : hr -3.83e5 (bouclage PCS, exothermique) -> +4.2e5 J/kg (endothermique, Di Blasi 2000 Tab. 4) ; front Kim x3 trop rapide
 
     // Oxydation du char (C + O2 -> CO2 et C + 0.5 O2 -> CO), Boudouard, gaz a l'eau :

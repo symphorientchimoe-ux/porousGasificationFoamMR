@@ -5,3 +5,5 @@ Les 60 premieres secondes (etat de depart) ont ete calculees avec l'ancien parta
 But : savoir si un rendement en charbon plus eleve corrige les deux erreurs du modele (BR/IR 0.89 contre 0.69 mesure ; couche de charbon 100-200 K trop froide).
 Ce n'est pas un recalage : diagnostic pour orienter le lot 5 (pyrolyse) de la feuille de route. Reference : R149L (IFS 3.22, BR 123.7).
 Arret 60 s apres T2 (colonne 4).
+
+16/11/2026 : relance. Le passage du 13/11 (ecm9) s arretait au premier pas (« violates mass conservation ») : les produits sommaient a 100.001. Goudron 12.403 -> 12.402 (somme 100.000, recalcule depuis le partage a 20 kg : -8 x 94.11/72.06 = -10.448 de goudron, +2.000 H2O, +0.448 H2).
