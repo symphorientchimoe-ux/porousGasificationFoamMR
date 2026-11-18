@@ -1,0 +1,4 @@
+N25 : débit 149_M25 kg/m2h, couvercle non, départ base_149_M25 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 6
+endTime 4000
+bedCollapse off (test de l'effondrement du lit, 18/11/2026)
