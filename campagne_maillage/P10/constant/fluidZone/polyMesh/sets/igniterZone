@@ -1,0 +1,38 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       cellSet;
+    location    "constant/fluidZone/polyMesh/sets";
+    object      igniterZone;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+15
+(
+645 
+646 
+647 
+648 
+649 
+650 
+651 
+652 
+653 
+654 
+655 
+656 
+657 
+658 
+659 
+)
+
+// ************************************************************************* //

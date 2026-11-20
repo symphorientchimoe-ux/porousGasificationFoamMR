@@ -170,10 +170,51 @@ void Foam::combustionModels::laminarEDM<ReactionThermo>::correct()
     const label nR = fueli_.size();
 
     const volVectorField& U = mesh.template lookupObject<volVectorField>("U");
-    const volScalarField strainRate(sqrt(2.0)*mag(symm(fvc::grad(U))));
+    const volScalarField strainRateField(sqrt(2.0)*mag(symm(fvc::grad(U))));
 
     tmp<volScalarField> trho(this->thermo().rho());
     const scalarField& rho = trho();
+
+    // 2026-11-21 (article ECM, mesh dependence): mixing frequency of the EDM.
+    // "strainRate" (default, = v1.1): resolved strain rate sqrt(2)|symm(grad U)|,
+    // which grows as the mesh is refined across the front. "poreScale": inside
+    // the bed (porosityF < epsBed) the frequency of gas crossing one pore,
+    // |U|/(porosityF*dp) + (mu/rho)/dp^2 (U is the superficial velocity; unit
+    // Schmidt number as in the species equation); no gradient, hence no mesh
+    // dependence by construction. Outside the bed the resolved strain rate is kept.
+    const word mixing =
+        this->coeffs().template lookupOrDefault<word>("mixing", "strainRate");
+    scalarField strainRate(strainRateField.primitiveField());
+    if (mixing == "poreScale")
+    {
+        const scalar dp = this->coeffs().template lookup<scalar>("dp");
+        const scalar epsBed =
+            this->coeffs().template lookupOrDefault<scalar>("epsBed", 0.99);
+        const scalarField& epsF =
+            mesh.template lookupObject<volScalarField>("porosityF").primitiveField();
+        tmp<volScalarField> tmu(this->thermo().mu());
+        const scalarField& mu = tmu();
+        label nPore = 0;
+        forAll(strainRate, celli)
+        {
+            if (epsF[celli] < epsBed)
+            {
+                strainRate[celli] =
+                    mag(U[celli])/(max(epsF[celli], small)*dp)
+                  + mu[celli]/(rho[celli]*sqr(dp));
+                nPore++;
+            }
+        }
+        reduce(nPore, sumOp<label>());
+        Info<< "laminarEDM: poreScale mixing in " << nPore << " bed cells (dp = "
+            << dp << " m, epsBed = " << epsBed << ")" << endl;
+    }
+    else if (mixing != "strainRate")
+    {
+        FatalErrorInFunction
+            << "laminarEDMCoeffs mixing " << mixing
+            << " unknown: strainRate or poreScale" << exit(FatalError);
+    }
 
     // Realizability cap weighted by the gas volume fraction (2026-09-26, code
     // analysis): the gas stores porosityF*rho*Y per unit volume, so the amount

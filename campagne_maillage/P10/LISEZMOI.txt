@@ -1,0 +1,4 @@
+M10 : débit 149_M10 kg/m2h, couvercle non, départ base_149_M10 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 5
+endTime 6000
+21/11/2026 : serie de maillage avec melange de pore (laminarEDM mixing poreScale) pour lever la dependance au maillage ; sources v1.1 + bilanPostes + option poreScale (branche campagne-v4).
