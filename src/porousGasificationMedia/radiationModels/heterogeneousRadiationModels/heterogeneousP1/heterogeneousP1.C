@@ -163,11 +163,11 @@ Foam::radiationModels::heterogeneousP1::heterogeneousP1
     (
         IOobject
         (
-            "surfF",
-            mesh_.time().timeName(),
-            mesh_,
+            "surfFrad",   // v1.1: own name (was "surfF", the name of the
+            mesh_.time().timeName(),   // pyrolysis border indicator) and
+            mesh_,                     // written, to check the border factor
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh_,
         scalar(0.0)
@@ -365,6 +365,61 @@ void Foam::radiationModels::heterogeneousP1::calculate()
         }
     }
 
+    // v1.1 (2026-10-26, verification V6, paper Section 4.3): exact border
+    // factor. The three branches above replace the exposed surface per unit
+    // volume of a border cell by 1/(cell length), which on the wedge meshes
+    // of the validation case gives 0.212 1/m instead of lambda/dz = 0.300 1/m
+    // on the bed-top row (29% low). The exact value is the area of the faces
+    // that the cell shares with gas-only cells, divided by its volume; it is
+    // the same for 3-D, 2-D and wedge meshes. exactBorderFactor no = v1.0.
+    if (lookupOrDefault<Switch>("exactBorderFactor", true))
+    {
+        const scalar gasPor = 1.0 - pow(10.0, -8.0);
+        volScalarField por("porBorder", porosityF_);
+        por.correctBoundaryConditions();
+
+        scalarField exposed(mesh_.nCells(), 0.0);
+        const labelUList& own = mesh_.owner();
+        const labelUList& nei = mesh_.neighbour();
+        const scalarField& magSf = mesh_.magSf();
+        forAll(nei, facei)
+        {
+            const bool solidO = por[own[facei]] <= gasPor;
+            const bool solidN = por[nei[facei]] <= gasPor;
+            if (solidO && !solidN)
+            {
+                exposed[own[facei]] += magSf[facei];
+            }
+            else if (solidN && !solidO)
+            {
+                exposed[nei[facei]] += magSf[facei];
+            }
+        }
+        forAll(por.boundaryField(), patchi)
+        {
+            if (por.boundaryField()[patchi].coupled())
+            {
+                const scalarField porNei
+                (
+                    por.boundaryField()[patchi].patchNeighbourField()
+                );
+                const labelUList& fc = mesh_.boundaryMesh()[patchi].faceCells();
+                const scalarField& magSfp = mesh_.magSf().boundaryField()[patchi];
+                forAll(fc, i)
+                {
+                    if (por[fc[i]] <= gasPor && porNei[i] > gasPor)
+                    {
+                        exposed[fc[i]] += magSfp[i];
+                    }
+                }
+            }
+        }
+        forAll(surfF_, celli)
+        {
+            surfF_[celli] = borderL_.value()*exposed[celli]/mesh_.V()[celli];
+        }
+    }
+
     scalar totalSurf = gSum(surfV);
 
     scalar totalVol = 0;
@@ -381,6 +436,28 @@ void Foam::radiationModels::heterogeneousP1::calculate()
             whereIsNot_[cellI] = 0.0;
             totalVol += mesh_.V()[cellI];
         }
+    }
+
+    // v1.1 (2026-10-19, verification V2, paper Section 4.7): the boundary values of
+    // whereIs_/whereIsNot_ kept their construction value 1/0 on every
+    // patch, so gamma (below) used the bed absorption as at walls of
+    // gas-only cells (gamma_b = 1/277.7 m instead of 1/5 m in the V2 slab):
+    // copy the adjacent cell value to non-coupled patches, then update
+    // the coupled ones (processor, wedge). boundaryWhereIs no = v1.0.
+    if (lookupOrDefault<Switch>("boundaryWhereIs", true))
+    {
+        forAll(whereIs_.boundaryField(), patchi)
+        {
+            if (!whereIs_.boundaryField()[patchi].coupled())
+            {
+                whereIs_.boundaryFieldRef()[patchi] =
+                    whereIs_.boundaryField()[patchi].patchInternalField();
+                whereIsNot_.boundaryFieldRef()[patchi] =
+                    whereIsNot_.boundaryField()[patchi].patchInternalField();
+            }
+        }
+        whereIs_.correctBoundaryConditions();
+        whereIsNot_.correctBoundaryConditions();
     }
 
     reduce(totalVol, sumOp<scalar>());

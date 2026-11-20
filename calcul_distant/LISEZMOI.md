@@ -47,3 +47,10 @@ Un fichier `ARRET` dans le cas (« colonne délai ») arrête le calcul « déla
 
 Compilation 3 min (puis cache). Passage : 2 à 2,5 min de surcoût (conteneur, artefacts). Vitesse en série :
 31 à 50 s simulées par heure selon la machine (station : 42 s/h sur un cœur libre).
+
+## Attention : version des sources (20/11/2026)
+
+Sans `-f ref=...`, le workflow compile les sources **de la branche lancée**. Les branches `campagne-v11` et `campagne-v2`
+contiennent les sources de la **v1.0** : les cas P149yc28 (relance du 16/11), B149bilan, M10, N5, N25 et M25 y ont tourné
+en v1.0 par erreur. La branche `campagne-v3` contient les sources de la v1.1 (tag `v1.1`) plus la bibliothèque `bilanPostes`.
+Contrôle : un binaire v1.1 écrit `conservativeDdt true` en tête de `log.run.1`.

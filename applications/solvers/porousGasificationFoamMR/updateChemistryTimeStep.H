@@ -38,7 +38,19 @@ if (adjustTimeStep and gasChemistryTimeStepControl)
 
     scalar TgasChemistry = great;
 
-    if (runTime.timeIndex() == runTime.startTimeIndex())
+    // v1.1 (2026-10-26, paper Section 5.5): the initial cap was applied at
+    // the first step of every run, a restart included, so that a restarted
+    // run followed another sequence of time steps than the uninterrupted
+    // one. It is now applied at a start from t = 0 only (exactRestart yes,
+    // default); exactRestart no = v1.0.
+    if
+    (
+        runTime.timeIndex() == runTime.startTimeIndex()
+     && (
+            runTime.startTime().value() == 0
+         || !runTime.controlDict().lookupOrDefault<Switch>("exactRestart", true)
+        )
+    )
     {
         // reaction->Qdot() is exactly zero before gas chemistry has ever
         // been solved once, so a heat-release-based bound (below) cannot
