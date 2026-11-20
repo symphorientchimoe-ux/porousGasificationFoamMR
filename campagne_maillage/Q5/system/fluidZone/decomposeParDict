@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Comme test99 : 4 sous-domaines, decoupage en z uniquement (direction la plus
+// resolue). Le meme decoupage geometrique s'applique a fluidZone et solidZone.
+// NE PAS lancer decomposePar tant que les deux runs de production occupent
+// tous les coeurs (voir Allrun.solve).
+numberOfSubdomains 2;
+
+method            simple;
+
+simpleCoeffs
+{
+    n               (1 1 2);
+    delta           0.001;
+}
+
+// ************************************************************************* //

@@ -13,3 +13,5 @@ vérifié sur kimReactor149_restart).
 | P125 | 1,25 mm | T4 + 60 s | 4 |
 
 149 kg/m2h, ciel ouvert, allumeur 10 mm, état à 60 s identique aux séries M (mapFields depuis 5 mm).
+| Q5 | 5 mm, effondrement coupé | T4 + 60 s | 2 |
+| Q25 | 2,5 mm, effondrement coupé | T4 + 60 s | 2 |
