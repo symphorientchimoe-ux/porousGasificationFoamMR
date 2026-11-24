@@ -1,0 +1,39 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    object      specieTransferProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Transfert de masse gaz-char (constST, comme test99 ; test87 : h 0.06 m/s,
+// Wakao & Funazkri 1978 pour dp = 49 mm). A recalculer pour le granule de bois.
+specieTransferModel constST;
+
+Parameters
+{
+  // 2026-09-29 -- h : Wakao & Funazkri, Sh = 2 + 1.1 Re^0.6 Sc^(1/3)
+  //   (Wakao N., Funazkri T. 1978, Chem. Eng. Sci. 33:1375-1384,
+  //    doi:10.1016/0009-2509(78)85120-3 -- existence verifiee OpenAlex).
+  //   Memes conditions que heatTransferProperties : G = 0.04139 kg/m2/s,
+  //   air 800 K (Incropera Table A.4), d_sv = 0.00682 m -> Re = 7.63.
+  //   D(O2-N2) : 0.18e-4 m2/s a 273 K, 1 atm (Incropera 7e ed., Table A.8),
+  //   extrapole en T^(3/2) (note b de la meme table) :
+  //   D(800 K) = 0.18e-4*(800/273)^1.5 = 9.03e-5 m2/s
+  //   Sc = mu/(rho D) = 3.698e-5/(0.4354*9.03e-5) = 0.94
+  //   Sh = 2 + 1.1*3.385*0.94^(1/3) = 5.65
+  //   h  = Sh D/d_sv = 5.65*9.03e-5/0.00682 = 0.0748 m/s
+  // 2026-10-19 cas 74.5 (CONSTATS 21.49) : meme correlation
+  h        0.0584;   // [m/s] Wakao-Funazkri 1978 a 74.5 kg/m2/h (149 : 0.0748)
+  // meme SAV que heatTransferProperties : 6*(1-0.38)/0.00682 (DERIVE)
+  SAV      545.5;    // [1/m] DERIVE
+}
+
+// ************************************************************************* //

@@ -1,0 +1,4 @@
+L25_298 (24/11/2026, article ECM option 2) : débit 298 kg/m2h, couvercle, maille de 2,5 mm dans le lit, mélange de pore (poreScale).
+Maillage et réglages de campagne_maillage/P25 ; patch lid ajouté (topoSet + createPatch, comme ref5_lid) ; état à 60 s de
+L298 (5 mm, couvercle) transféré par mapFields mapNearest ; propriétés de transfert et débit de L298.
+Arrêt 420 s après le passage à 600 °C de la colonne 3 (T1), endTime 9000.
