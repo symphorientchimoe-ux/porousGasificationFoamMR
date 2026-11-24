@@ -1,0 +1,6 @@
+L25_596 (24/11/2026, article ECM option 2) : débit 596 kg/m2h, couvercle, maille de 2,5 mm dans le lit, mélange de pore (poreScale).
+Maillage et réglages de campagne_maillage/P25 ; patch lid ajouté (topoSet + createPatch, comme ref5_lid) ; état à 60 s de
+L596_ign4r (5 mm, couvercle) transféré par mapFields mapNearest ; propriétés de transfert et débit de L596_ign4r.
+Arrêt 420 s après le passage à 600 °C de la colonne 3 (T1), endTime 9000.
+Allumeur de 40 mm (z 0,360-0,400, comme L596_ign4r) : igniterZone refait par topoSet (topoSetDict.ign4r) sur la maille de 2,5 mm, 240 mailles.
+Étape 2a (60-65 s, maxUa 3, allumeur 1000 K) calculée en local le 24/11 avec build_pore_v4 (v1.1 + poreScale, conservativeDdt true) ; suite sur GitHub depuis 65 s (maxUa 0,3).

@@ -27,3 +27,4 @@ propriétés de transfert et débit de la référence). Essai local de L25_149 :
 | L25_149 | 149 | R149L (+ bilanPostes et coupes, comme B149bilan) | T1 + 420 s |
 | L25_74 | 74,5 | L74 | T1 + 420 s |
 | L25_298 | 298 | L298 | T1 + 420 s |
+| L25_596 | 596 | L596_ign4r (allumeur 40 mm, igniterZone refait ; 60-65 s en local) | T1 + 420 s |
