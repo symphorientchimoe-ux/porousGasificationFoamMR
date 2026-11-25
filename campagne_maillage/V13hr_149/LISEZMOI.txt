@@ -1,0 +1,13 @@
+V13hr_149 (25/11/2026) : V13_149 (voir ci-dessous) avec la chaleur de pyrolyse des 34 réactions CRECK 2502 multipliée par 4,403
+(scripts/multiplier_hr.py, ni l'eau ni le char ; fichier identique à celui de cas_R149_v12_hr). Prise en compte du verdict hr du
+25/11 : la chaleur de pyrolyse est la cause principale du front trop rapide de la v1.2 (T5->T4 > 808 s, > +13 % contre 712,8 s).
+Seule différence avec V13_149 : constant/fluidZone/chemistryProperties (l'original hr x1 est gardé en chemistryProperties.hr1).
+Témoin : V13_149 (hr x1), sur GitHub depuis 65 s. Même état de départ à 60 s.
+---
+V13_149 (25/11/2026) : calcul long v1.3 (branche v1.3, commit 32cb6b8) dans les conditions de Kim : 149 kg/m2h, couvercle,
+maille de 2,5 mm dans le lit (maillage et réglages de L25_149). Modèles actifs : pyrolyse CRECK 2502 (fichiers de
+cas_R149_v12_lid), mélange de pore (dp 6,82 mm), rétrécissement de la particule (shrinkingSphereCONV/ST, ergunLocalDp),
+correction de Biot (kParticle 0,17). Wakao local coupé. État à 60 s de cas_R149_v12_lid (5 mm, CRECK, couvercle posé
+à 60 s, sources v1.0) transféré par mapFields mapNearest. Arrêt T1 + 420 s, endTime 9000. À comparer à Kim 2016 et,
+à titre indicatif (plusieurs changements), à L25_149.
+Étape 2a (60 -> 65 s, maxUa 3) calculée en local le 25/11/2026 avec release/_build_v13 ; suite sur GitHub depuis 65 s (ref v1.3).
