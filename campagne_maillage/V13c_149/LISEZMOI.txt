@@ -1,0 +1,9 @@
+V13c_149 (25/11/2026) : témoin « CRECK seul » de la v1.3 (branche v1.3, 32cb6b8, binaire release/_build_v13).
+V13_149 avec le rétrécissement de la particule (A : shrinkingSphereCONV/ST, ergunLocalDp) et la correction de Biot (C)
+coupés : heatTransferProperties et specieTransferProperties de L25_149 (constCONV/constST, SAV 545,5), pas d ergunLocalDp.
+Modèles actifs : pyrolyse CRECK 2502 + mélange de pore (dp 6,82 mm), comme L25_149 pour tout le reste (maillage 2,5 mm,
+couvercle, 149 kg/m2h). Même état de départ à 60 s que V13_149 et V13hr_149.
+Lecture : V13c - L25_149 = effet de CRECK seul (base v1.1) ; V13_149 - V13c = effet de A + C ; V13hr - V13 = chaleur de pyrolyse.
+Arrêt T1 + 420 s, endTime 9000.
+---
+Étape 2a (60 -> 65 s, maxUa 3) calculée en local le 25/11/2026 avec release/_build_v13 ; suite sur GitHub depuis 65 s (ref v1.3).
