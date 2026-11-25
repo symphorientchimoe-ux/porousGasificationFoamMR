@@ -208,7 +208,16 @@ jobs:
           if [ "$passe" -gt "${{ inputs.passes_max }}" ]; then echo "Nombre maximal de passages atteint."; exit 0; fi
           liste="[$(IFS=,; echo "${restants[*]}")]"
           echo "Relance du passage $passe pour $liste"
-          gh workflow run gazeification.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
-            -f cas="$liste" -f ref="${{ inputs.ref }}" -f np="${{ inputs.np }}" \
-            -f budget="${{ inputs.budget }}" -f budget_max="${{ inputs.budget_max }}" -f ecriture="${{ inputs.ecriture }}" -f reprise_run_id="${{ github.run_id }}" -f passe="$passe" \
-            -f passes_max="${{ inputs.passes_max }}" -f etiquette="${{ inputs.etiquette }}"
+          # 2026-11-25 : 5 essais, une erreur passagere de l'API (HTTP 502 vu le 25/11 sur P5_mT) cassait la chaine.
+          for essai in 1 2 3 4 5; do
+            if gh workflow run gazeification.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
+              -f cas="$liste" -f ref="${{ inputs.ref }}" -f np="${{ inputs.np }}" \
+              -f budget="${{ inputs.budget }}" -f budget_max="${{ inputs.budget_max }}" -f ecriture="${{ inputs.ecriture }}" -f reprise_run_id="${{ github.run_id }}" -f passe="$passe" \
+              -f passes_max="${{ inputs.passes_max }}" -f etiquette="${{ inputs.etiquette }}"; then
+              echo "Relance envoyee (essai $essai)."; exit 0
+            fi
+            echo "Echec de la relance (essai $essai), nouvel essai dans $((60 * essai)) s."
+            [ "$essai" -lt 5 ] && sleep $((60 * essai))
+          done
+          echo "::error::Relance impossible apres 5 essais : relancer a la main (reprise_run_id ${{ github.run_id }}, passe $passe)."
+          exit 1
