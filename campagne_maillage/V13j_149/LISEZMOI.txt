@@ -1,0 +1,9 @@
+V13j_149 (25/11/2026) : V13_149 (CRECK + mélange de pore + rétrécissement A + Biot C, v1.3, release/_build_v13) avec la chaleur
+de pyrolyse CRECK rendue cohérente avec les Cp du solveur (v12_ranzi/scripts/chaleur_coherente.py), SANS facteur réglé :
+hr_j <- hr_j + [dh_j(700 K) avec h_solide = h_CRECK(298) + 1650 (T-298)] - [dh_j(700 K) avec les Cp NASA de CRECK].
+Motif : les Cp des solides de BIO.CKT (3600-4800 J/kg/K, CHAR jusqu'à 6100) ne sont pas physiques ; le solveur chauffe les solides
+à 1650 J/kg/K. Chaleur effective 0D à 100 K/min : 95 (V13) -> 231 kJ/kg (V13j) ; V13hr (×4,403, réglé sur la v1.1) : 420 kJ/kg.
+Seule différence avec V13_149 : constant/fluidZone/chemistryProperties (original en chemistryProperties.hrCRECK). Même état à 60 s.
+Arrêt T1 + 420 s, endTime 9000.
+---
+Étape 2a (60 -> 65 s, maxUa 3) calculée en local le 25/11/2026 avec release/_build_v13 ; suite sur GitHub depuis 65 s (ref v1.3).
