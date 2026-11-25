@@ -1,0 +1,6 @@
+N5 : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 6
+endTime 4000
+21/11/2026 : serie de maillage avec melange de pore (laminarEDM mixing poreScale) pour lever la dependance au maillage ; sources v1.1 + bilanPostes + option poreScale (branche campagne-v4).
+
+P5_mT (25/11/2026, article ECM, limite 3) : P5 avec dp = 47,8e-3 m dans laminarEDM (melange seulement). Frequence de melange equivalente, aux conditions typiques du front (u interstitielle 0,25 m/s, nu 1,5e-4 m2/s), a D_T/d^2 avec la dispersion transversale de Delgado (Heat Mass Transfer 42, 2006, eq. 39 : D_T = Dm/tau + u d/PeT, tau = sqrt2, PeT = 12) : 5,3 s-1 contre 39,9 s-1 pour P5 (x0,13). P5_m05 (x0,5) correspond de meme a la dispersion longitudinale (PeL = 2). Arret T3 + 60 s.
