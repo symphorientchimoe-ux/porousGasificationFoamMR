@@ -1,0 +1,7 @@
+N5 : débit 149 kg/m2h, couvercle non, départ base_149 à 60 s
+arrêt 60 s après le passage à 600 °C de la colonne 6
+endTime 4000
+21/11/2026 : serie de maillage avec melange de pore (laminarEDM mixing poreScale) pour lever la dependance au maillage ; sources v1.1 + bilanPostes + option poreScale (branche campagne-v4).
+
+P5_m2 (25/11/2026, article ECM, limite 3 du melange de pore) : P5 avec dp = 3.41e-3 m au lieu de 6,82e-3, soit une frequence de melange x2 dans le lit.
+Le dp de laminarEDM ne sert qu'au melange (pas a la physique du lit). Arret T3 + 60 s comme P5.

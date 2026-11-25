@@ -1,0 +1,22 @@
+// 16/11/2026 article ECM (rapport 3, point 3.3) : bilan d'energie par poste.
+// Bibliotheque src/porousGasificationMedia/functionObjects/bilanPostes (compilee par Allwmake) : flux integres a CHAQUE pas
+// (somme flux*dt), moyenne de chaque seconde simulee ecrite dans postProcessing/bilanPostes/<temps de depart>/{fluide,solide}.dat.
+// fluide.dat : t duree phi_in Ha_in phi_out Ha_out Hs_out mCO mH2 mCH4 mC6H5OH mCO2 mH2O mO2 (kg/s, W ; phi_in < 0)
+// solide.dat : t duree q_paroi (W, conduction a outerWall du refractaire, < 0 = perte)
+    bilanPostesFluide
+    {
+        type        bilanPostes;
+        libs        ("libbilanPostes.so");
+        region      fluidZone;
+        mode        fluide;
+        species     (CO H2 CH4 C6H5OH CO2 H2O O2);
+        interval    1;
+    }
+    bilanPostesSolide
+    {
+        type        bilanPostes;
+        libs        ("libbilanPostes.so");
+        region      solidZone;
+        mode        solide;
+        interval    1;
+    }

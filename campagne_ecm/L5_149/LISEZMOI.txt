@@ -1,0 +1,4 @@
+L5_149 (25/11/2026, article ECM, limite 2 du melange de pore) : copie de B149bilan (etat v1.1 a 60 s de R149L, couvercle,
+149 kg/m2h, maille de 5 mm, bilanPostes) avec le seul changement laminarEDM mixing poreScale (dp 6,82 mm), comme campagne_maillage/P5.
+But : comparer 5 mm et 2,5 mm (L25_149, meme etat a 60 s transfere) avec le couvercle, sur T5 -> T3.
+Arret 60 s apres le passage de T3 a 600 C (ARRET : colonne 5 = T3).
