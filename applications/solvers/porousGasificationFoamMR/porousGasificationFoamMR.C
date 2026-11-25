@@ -45,6 +45,7 @@ Description
 #include "pressureControl.H"
 #include "fvOptions.H"
 #include "localEulerDdtScheme.H"
+#include "shrinkingParticle.H"
 #include "fvcSmooth.H"
 #include "fieldPorosityModel.H"
 #include "BasicSolidChemistryModel.H"
