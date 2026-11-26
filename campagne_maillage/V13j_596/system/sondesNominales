@@ -1,0 +1,24 @@
+// 2026-10-12 (audit, CONSTATS sect. 21.10) : sondes a la hauteur NOMINALE de Kim, interpolees (cellPoint).
+// probesKim_fluid (valeur de maille, cotes + 0.5 mm) lit la maille de 10 mm AU-DESSUS de chaque cote (+5 mm)
+// et T6 (0.3995) lit la rangee de l'allumeur (-5 mm). probesKim_fluid reste en place pour comparer aux anciens cas.
+// T6 n'est pas repris ici : a z = 0.400 (surface du lit) l'interpolation melangerait Ts avec le franc-bord (Ts = 300 K fictif).
+// Teste le 12/10 sur le rejeu _cons a 1496 s : T4 nominal 754,9 K = moyenne des mailles 0,295/0,305 (489,6 et 1020,3 K).
+// Usage : copier dans <cas>/system/ puis ajouter  #include "sondesNominales"  juste apres "functions {" du controlDict.
+probesKim_nominal
+{
+    type            probes;
+    libs            ("libsampling.so");
+    region          fluidZone;
+    writeControl    runTime;
+    writeInterval   5;
+    interpolationScheme cellPoint;
+    fields          (T Ts O2 CO CO2 porosityF Ychar);
+    probeLocations
+    (
+        (0.002 0 0.150)   // T1  50 mm
+        (0.002 0 0.200)   // T2  100 mm
+        (0.002 0 0.250)   // T3  150 mm
+        (0.002 0 0.300)   // T4  200 mm
+        (0.002 0 0.350)   // T5  250 mm
+    );
+}
