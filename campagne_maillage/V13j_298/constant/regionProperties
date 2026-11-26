@@ -1,0 +1,33 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      regionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// v4 (2026-09-09) : fluidZone = plenum+biomass_bed+gas_zone (ecoulement
+// reactif poreux, physique porousGasificationFoam inchangee), solidZone =
+// refractory (conduction pure, aucune espece/ecoulement -- regle la fuite
+// de gaz a travers l'interface aluminium/refractaire identifiee dans
+// gasifier_maillageReel_v3, cf PROTOCOLE_MAILLAGEREEL.md). Utilise par les
+// utilitaires standards (decomposePar, reconstructPar, foamToVTK...) pour
+// enumerer les regions ; le solveur porousGasificationFoamMR code ces noms
+// en dur, il ne lit pas ce fichier lui-meme.
+//
+regions
+(
+    fluid   (fluidZone)
+    solid   (solidZone)
+);
+
+// ************************************************************************* //
