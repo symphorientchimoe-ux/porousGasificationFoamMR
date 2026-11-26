@@ -1,0 +1,283 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      chemistryProperties;
+}
+
+chemistry           on;
+
+chemistryType
+{
+    solver            ode;
+}
+
+reactions
+{
+    COoxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "CO + 0.5O2^0.25 + H2O^0.5 = CO2 + H2O";
+        A        2.239e12;
+        beta     0;
+        Ta       20470;
+    }
+    H2oxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "H2 + 0.5O2^1 = H2O";
+        A        9.87e8;
+        beta     0;
+        Ta       3728.4;
+    }
+    CH4oxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "CH4^0.7 + 0.5O2^0.8 = CO + 2H2";
+        A        5.012e11;
+        beta     0;
+        Ta       24054;
+    }
+    C2H4oxidation
+    {
+        // v1.2 (16/11/2026) HYPOTHESE : cinetique de CH4oxidation (Meng et al. 2018), aucune source
+        // verifiee pour C2H4 ; a remplacer. C2H4 vient du regroupement des gaz CRECK (C2H6, aromatiques).
+        type     irreversibleBoundedArrhenius;
+        reaction "C2H4^0.7 + O2^0.8 = 2CO + 2H2";
+        A        5.012e11;
+        beta     0;
+        Ta       24054;
+    }
+    TARoxidation
+    {
+
+        type     irreversibleBoundedArrhenius;
+        reaction "C6H5OH^0.5 + 4O2^1 = 6CO + 3H2O";
+        A        1.1185e8;
+        beta     1;
+        Ta       9621.7;
+    }
+
+}
+
+solidChemistryType
+{
+    solver              solidOde;
+    method              ODESolidHeterogeneousChemistryModel;
+    solidThermoType     const<constRad<constThermo<constRho>>>;
+}
+
+chemistrySolver     ode;
+
+solidChemistrySolver	solidOde;
+
+initialChemicalTimeStep 1e-5;
+
+gasChemistryTimeStepControl true;
+
+gasAlphaTemp 0.1;
+
+turbulentReaction   off;
+solidReactionEnergyFromEnthalpy false;
+stoichiometricReactions false;
+showRelativeReactionRates false;
+
+diffusionLimitedReactions true;
+
+odeCoeffs
+{
+    solver          Rosenbrock34;
+    absTol          1e-10;
+    relTol          1e-6;
+    maxSteps        100000;
+}
+
+solidOdeCoeffs
+{
+
+    solver      RKF45;
+    absTol      1e-8;
+    relTol      0.01;
+    maxSteps    100000;
+}
+
+// v1.2 (16/11/2026) : genere par v12_ranzi/scripts/generer_v12.py
+// ORDRE IMPOSE : identique a thermo.compressibleGas
+species 	//gaseous products of reactions
+(
+    CO N2 O2 CO2 H2 CH4 H2O C6H5OH C2H4
+);
+solidReactions
+(
+    // eau : desorption CRECK et resorption de Caraccio et al. 2026
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 moisture = 100 H2O
+    (1.0 4025.76 250 2.26e6 1.0)
+    irreversibleSolidPowerArrheniusHeterogeneousReaction
+    100 H2O = 100 moisture
+    (5.874e-6 2 -420.435 250 -2.26e6 1.0)
+    // CRECK 2502 : CELL=>CELLA ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CELL = 100 CELLA
+    (7.0000e+13 22644.9 300 -6.1030e+05 1.0)
+    // CRECK 2502 : CELLA=>0.3251CH2OHCHO+0.02CHOCHO+0.0431CH3CHO+0.08C6H6O3+0.14CH3OH+0.2637CH2O+0.08CO+0.06COS+0.29CO2+0.0023H2+1.8547H2O+0.05CH2OS+0.02HOCHO+0.026CH2OHCH2CHO+0.03CH4+0.024H2S+1.1CHAR+0.1323CH3COCH3+0.287FURFURAL+0.2FURAN ; gaz regroupes, hr corrige de -1.4123e+05 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CELLA = 1.0361328125 COS + 0.92578125 CH2OS + 0.0302734375 H2S + 8.1484375 CHAR + 25.9580078125 CO + 1.21484375 H2 + 25.7216796875 H2O + 28.0712890625 C6H5OH + 7.9892578125 CO2 + 0.904296875 CH4
+    (1.5000e+06 10064.4 300 8.5894e+05 1.0)
+    // CRECK 2502 : CELLA=>0.6LVG+0.2LVGS+0.2C6H10O5 ; gaz regroupes, hr corrige de +1.5807e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CELLA = 20 LVGS + 28.779296875 CO + 0.7724609375 H2 + 20.12890625 H2O + 30.3193359375 C6H5OH
+    (5.0000e+04 7296.7 300 2.1109e+06 1.0)
+    // CRECK 2502 : CELL=>4.45H2O+5.45CHAR+0.12COH2S+0.18CH2OS+0.25COS+0.125H2S+0.125H2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CELL = 40.3720703125 CHAR + 2.22265625 COH2S + 3.3330078125 CH2OS + 4.318359375 COS + 0.1552734375 H2S + 49.443359375 H2O + 0.1552734375 H2
+    (8.0000e+07 15599.8 300 -6.7542e+06 1.0)
+    // CRECK 2502 : GMSW=>0.70HCE1+0.30HCE2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 GMSW = 70 HCE1 + 30 HCE2
+    (1.0000e+10 15599.8 300 1.0005e+05 1.0)
+    // CRECK 2502 : XYHW=>0.35HCE1+0.65HCE2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 XYHW = 35 HCE1 + 65 HCE2
+    (1.2500e+11 15801.1 300 1.0018e+05 1.0)
+    // CRECK 2502 : XYGR=>0.12HCE1+0.88HCE2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 XYGR = 12 HCE1 + 88 HCE2
+    (1.2500e+11 15096.6 300 1.0007e+05 1.0)
+    // CRECK 2502 : HCE1=>.25C5H8O4+.25C6H10O5+.16FURFURAL+.13C6H6O3+0.09CO2+0.1CH4+.54H2O+0.06CH2OHCH2CHO+.1CHOCHO+0.02H2+0.1CHAR ; gaz regroupes, hr corrige de -4.9058e+04 J/kg
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 HCE1 = 0.9091796875 CHAR + 37.720703125 CO + 1.193359375 H2 + 21.16796875 H2O + 34.796875 C6H5OH + 2.998046875 CO2 + 1.2138671875 CH4
+    (1.6000e+01 6491.5 300 2.6689e+06 1.0)
+    // CRECK 2502 : HCE1=>0.4H2O+.39CO2+0.05HOCHO+.49CO+.01COS+.51CO2S+.05H2S+.4CH2O+.43CH2OS+0.3CH4+0.325CH4S+0.1C2H4+.075C2H4S+.975CHAR+0.37COH2S+0.1H2+0.2C2H6S ; gaz regroupes, hr corrige de +1.6314e+04 J/kg
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 HCE1 = 0.2119140625 COS + 16.98828125 CO2S + 0.076171875 H2S + 9.7724609375 CH2OS + 3.9462890625 CH4S + 1.5927734375 C2H4S + 8.8642578125 CHAR + 8.4091796875 COH2S + 4.5517578125 C2H6S + 6.080078125 H2O + 13.353515625 CO2 + 19.5283203125 CO + 0.0966796875 C6H5OH + 0.7626953125 H2 + 3.642578125 CH4 + 2.123046875 C2H4
+    (3.0000e-03 1811.6 300 -1.2730e+06 1.0)
+    // CRECK 2502 : HCE2=>0.0035CO+0.2898CO2+0CH4+0H2+0.1665H2O+.0661C2H5OH+.0423CH2OHCHO+.315CH3CO2H+.0178HOCHO+.145FURFURAL+.1362CH4S+.2312CH3OHS+.0158C2H4S+.45CO2S+.2337CH2OS+0.7662CHAR+.1H2S+0.7792COH2S+0.2445C2H6S ; gaz regroupes, hr corrige de -5.7304e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 HCE2 = 1.654296875 CH4S + 5.607421875 CH3OHS + 0.3359375 C2H4S + 14.990234375 CO2S + 5.3115234375 CH2OS + 6.9658203125 CHAR + 0.15234375 H2S + 17.7080078125 COH2S + 5.564453125 C2H6S + 5.6884765625 CO + 15.1064453125 CO2 + 6.927734375 H2O + 0.16796875 H2 + 1.525390625 CH4 + 12.2939453125 C6H5OH
+    (7.0000e+09 15348.2 300 -1.2780e+06 1.0)
+    // CRECK 2502 : LIGH=>LIGOH+0.5C2H5CHO+0.4C2H4+0.2CH2OHCHO+.1CO+.1C2H6 ; gaz regroupes, hr corrige de +1.7940e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIGH = 86.6923828125 LIGOH + 0.25390625 H2 + 0.66796875 CH4 + 1.638671875 H2O + 5.671875 C6H5OH + 2.892578125 C2H4 + 2.1826171875 CO
+    (6.7000e+12 18870.7 300 1.3727e+06 1.0)
+    // CRECK 2502 : LIGO=>LIGOH+CO2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIGO = 89.5810546875 LIGOH + 10.4189453125 CO2
+    (3.3000e+08 12832.1 300 1.1468e+06 1.0)
+    // CRECK 2502 : LIGC=>0.35LIGCC+0.1VANILLIN+0.1C6H5OCH3+0.27C2H4+H2O+0.17CH2OS+0.4COH2S+0.22CH2O+0.21CO+0.1CO2+0.36CH4S+5.85CHAR+.2C2H6S+0.1H2S ; gaz regroupes, hr corrige de +3.7857e+03 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIGC = 35 LIGCC + 1.9765625 CH2OS + 4.650390625 COH2S + 2.236328125 CH4S + 27.205078125 CHAR + 2.328125 C2H6S + 0.078125 H2S + 6.287109375 CO + 0.197265625 H2 + 7.267578125 H2O + 7.59375 C6H5OH + 3.4755859375 C2H4 + 1.7041015625 CO2
+    (1.0000e+11 18719.8 300 -6.7797e+05 1.0)
+    // CRECK 2502 : LIGCC=>0.25VANILLIN+.15CRESOL+0.15C6H5OCH3+0.35CH2OHCHO+0.7H2O+0.45CH4+0.3C2H4+0.7H2+1.15CO+0.4COS+6.80CHAR+0.4C2H6 ; gaz regroupes, hr corrige de +9.7950e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIGCC = 4.337890625 COS + 31.6220703125 CHAR + 21.0869140625 CO + 0.8662109375 H2 + 7.240234375 H2O + 22.505859375 C6H5OH + 7.060546875 C2H4 + 5.2802734375 CH4
+    (1.0000e+04 12479.8 300 -2.7533e+06 1.0)
+    // CRECK 2502 : LIGOH=>.9LIG+H2O+.1CH4+0.6CH3OH+0.3CH3OHS+0.05CO2+0.65CO+.6COS+0.05HOCHO+0.45CH2OS+0.40COH2S+0.25CH4S+0.1C2H4S+0.15C2H6S+4.25CHAR+.025C24H28O4+.1C2H3CHO ; gaz regroupes, hr corrige de -1.3064e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIGOH = 49.5263671875 LIG + 2.5400390625 CH3OHS + 4.44140625 COS + 3.5712890625 CH2OS + 3.173828125 COH2S + 1.0595703125 CH4S + 0.7412109375 C2H4S + 1.1923828125 C2H6S + 13.4912109375 CHAR + 6.994140625 H2O + 0.423828125 CH4 + 6.16796875 CO + 0.34765625 H2 + 5.62109375 C6H5OH + 0.7080078125 CO2
+    (1.5000e+08 16103.0 300 -1.4205e+06 1.0)
+    // CRECK 2502 : LIG=>VANILLIN+0.1C6H5OCH3+0.5C2H4+0.6CO+0.3CH3CHO+0.1CHAR ; gaz regroupes, hr corrige de +4.8187e+02 J/kg
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 LIG = 0.5771484375 CHAR + 29.228515625 CO + 0.513671875 H2 + 4.8115234375 H2O + 57.458984375 C6H5OH + 7.41015625 C2H4
+    (4.0000e+00 6038.6 300 3.8430e+06 1.0)
+    // CRECK 2502 : LIG=>0.6H2O+0.3CO+0.1CO2+.2CH4+.4CH2O+0.2COS+.4CH4S+0.5C2H4S+.4CH3OHS+1.25CH2OS+0.65COH2S+6.1CHAR+0.1H2S ; gaz regroupes, hr corrige de +9.3491e+03 J/kg
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 LIG = 2.6904296875 COS + 3.08203125 CH4S + 6.7373046875 C2H4S + 6.1552734375 CH3OHS + 18.0263671875 CH2OS + 9.373046875 COH2S + 35.1884765625 CHAR + 0.0966796875 H2S + 5.19140625 H2O + 9.4169921875 CO + 2.11328125 CO2 + 1.541015625 CH4 + 0.3876953125 H2
+    (8.3000e-02 4025.8 300 -3.6951e+06 1.0)
+    // CRECK 2502 : LIG=>.6H2O+2.6CO+0.6CH4+.4CH2O+0.75C2H4+.4CH3OH+4.5CHAR+0.5C2H6 ; gaz regroupes, hr corrige de +1.0941e+05 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LIG = 25.958984375 CHAR + 7.6318359375 H2O + 41.185546875 CO + 8.4755859375 CH4 + 0.724609375 H2 + 13.4736328125 C2H4 + 2.5498046875 C6H5OH
+    (1.5000e+09 15851.4 300 1.3251e+06 1.0)
+    // CRECK 2502 : TGL=>C2H3CHO+2.5MLINO+0.5U2ME12 ; gaz regroupes, hr corrige de +1.8331e+05 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 TGL = 1.873046875 CO + 0.28125 H2 + 66.01953125 C6H5OH + 19.8935546875 CH4 + 11.72265625 C2H4 + 0.2099609375 H2O
+    (7.0000e+12 22997.1 300 1.2984e+06 1.0)
+    // CRECK 2502 : TANN=>.85C6H5OH+.15C6H5OHS+COS+H2O+ITANN ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 TANN = 4.6396484375 C6H5OHS + 9.2060546875 COS + 53.9404296875 ITANN + 26.29296875 C6H5OH + 5.9208984375 H2O
+    (2.0000e+01 5032.2 300 -4.4607e+06 1.0)
+    // CRECK 2502 : ITANN=>5.CHAR+2CO+H2O+0.55CH2OS+0.45COH2S ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 ITANN = 36.5927734375 CHAR + 10.0625 CH2OS + 8.2333984375 COH2S + 34.134765625 CO + 10.9765625 H2O
+    (1.0000e+03 12580.5 300 8.3226e+06 1.0)
+    // CRECK 2502 : CO2S=>CO2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CO2S = 100 CO2
+    (1.0000e+06 12328.9 300 -1.0024e+07 1.0)
+    // CRECK 2502 : COS=>CO ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 COS = 100 CO
+    (5.0000e+12 26419.0 300 -7.9831e+06 1.0)
+    // CRECK 2502 : CH3OHS=>CH3OH ; gaz regroupes, hr corrige de +2.3219e+05 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CH3OHS = 13.44921875 CO + 5.4853515625 H2 + 39.64453125 H2O + 41.4208984375 C6H5OH
+    (2.0000e+12 25161.0 300 9.0856e+05 1.0)
+    // CRECK 2502 : CH2OS=>0.8CHAR+0.8H2O+.2CO+.2H2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CH2OS = 32.001953125 CHAR + 47.998046875 H2O + 18.6572265625 CO + 1.3427734375 H2
+    (6.0000e+10 25161.0 300 -4.1220e+06 1.0)
+    // CRECK 2502 : C2H6S=>C2H6 ; gaz regroupes, hr corrige de +1.1878e+06 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 C2H6S = 53.3525390625 CH4 + 46.6474609375 C2H4
+    (1.0000e+11 26167.4 300 5.2123e+06 1.0)
+    // CRECK 2502 : CH4S=>CH4 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 CH4S = 100 CH4
+    (1.0000e+11 26670.6 300 -2.5330e+05 1.0)
+    // CRECK 2502 : C2H4S=>C2H4 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 C2H4S = 100 C2H4
+    (1.0000e+11 27173.9 300 -1.6533e+05 1.0)
+    // CRECK 2502 : C6H5OHS=>C6H5OH ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 C6H5OHS = 100 C6H5OH
+    (1.5000e+12 27677.1 300 -2.2104e+02 1.0)
+    // CRECK 2502 : COH2S=>0.2CHAR+0.2H2O+0.4CO+0.8H2+0.4COSTIFFS ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 COH2S = 8 CHAR + 37.314453125 COSTIFFS + 12 H2O + 37.314453125 CO + 5.37109375 H2
+    (1.0000e+09 29690.0 300 3.3308e+07 1.0)
+    // CRECK 2502 : COSTIFFS=>0.8CO+0.2CHARO ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 COSTIFFS = 20 CHARO + 80 CO
+    (1.8000e+08 32709.3 300 -5.4042e+06 1.0)
+    // CRECK 2502 : H2S=>H2 ; gaz regroupes, hr corrige de +0.0000e+00 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 H2S = 100 H2
+    (1.8000e+08 35225.4 300 5.7415e+06 1.0)
+    // CRECK 2502 : LVGS=>LVG ; gaz regroupes, hr corrige de +1.9782e+04 J/kg
+    irreversibleSolidTemperatureArrheniusHeterogeneousReaction
+    100 LVGS = 35.990234375 CO + 0.966796875 H2 + 25.1533203125 H2O + 37.8896484375 C6H5OH
+    (9.5000e-02 5032.2 300 2.7583e+06 1.0)
+    // CRECK 2502 : LVGS=>LVG ; gaz regroupes, hr corrige de +1.9782e+04 J/kg
+    irreversibleSolidArrheniusHeterogeneousReaction
+    100 LVGS = 35.990234375 CO + 0.966796875 H2 + 25.1533203125 H2O + 37.8896484375 C6H5OH
+    (6.0000e+11 22644.9 300 2.7583e+06 1.0)
+    // reactions du char : v1.1 inchangees (char -> CHAR)
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 CHAR + 32 O2 = 44 CO2
+    (5.61e9 19600 300 -8.945e6 1.0 1.0)
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 CHAR + 16 O2 = 28 CO
+    (1.4025e13 25849 300 -3.947e6 1.0 1.0)
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 CHAR + 44 CO2 = 56 CO
+    (4065 15600 300 3.064e6 1.0 1.0)
+    irreversibleSolidArrheniusHeterogeneousReaction
+    12 CHAR + 18 H2O = 28 CO + 2 H2
+    (5323 15600 300 4.36e6 1.0 1.0)
+);
+
+
+// ************************************************************************* //
