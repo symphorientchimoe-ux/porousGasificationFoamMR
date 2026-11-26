@@ -1,0 +1,8 @@
+V13hr_298 (26/11/2026) : v1.3 (CRECK 2502 + mélange de pore + rétrécissement A + Biot C), conditions de Kim à 298 kg/m2h,
+couvercle, maille 2,5 mm (maillage, conditions d'entrée et ARRET de L25_298). Chaleur de pyrolyse : CRECK x4,403 (comme V13hr_149).
+h de transfert de chaleur et de matière : ceux de L25_298 (Wakao, débit 298).
+ÉTAT DE DÉPART HYBRIDE à 60 s (approximation acceptée par l'utilisateur le 26/11) : T, Ts, U, p, p_thermo, G et T, p du
+solide de L25_298 à 60 s ; composition CRECK, porosité, masses volumiques de cas_R149_v12_lid à 60 s (149 kg/m2h).
+Étape 2a locale 60 -> 65 s (maxUa 3, allumeur 1000 K, release/_build_v13), puis GitHub (campagne-v4, ref v1.3) depuis 65 s,
+maxUa 0,3, arrêt T1 + 420 s. Construit par v12_ranzi/construire_V13_serie.sh.
+Étape 2a (60 -> 65 s, maxUa 3) calculée en local le 26/11/2026 avec release/_build_v13 ; suite sur GitHub depuis 65 s (ref v1.3).
