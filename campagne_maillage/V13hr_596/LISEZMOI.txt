@@ -1,0 +1,9 @@
+V13hr_596 (26/11/2026) : v1.3 (CRECK 2502 + mélange de pore + rétrécissement A + Biot C), conditions de Kim à 596 kg/m2h,
+couvercle, maille 2,5 mm (maillage, conditions d'entrée et ARRET de L25_596). Chaleur de pyrolyse : CRECK x4,403 (comme V13hr_149).
+h de transfert de chaleur et de matière : ceux de L25_596 (Wakao, débit 596).
+ÉTAT DE DÉPART à 60 s ENTIÈREMENT REPRIS DE 149 (cas_R149_v12_lid, comme V13_149) ; seules les conditions d'entrée
+sont celles de 596. L'état hybride a été essayé et abandonné le 26/11 : L25_596 n'a gardé que 65 s (allumeur déjà à 1000 K),
+d'où 1000-1100 K sur du bois CRECK vierge dans l'allumeur, pyrolyse éclair, p et rho négatifs au premier pas.
+Étape 2a locale 60 -> 65 s (maxUa 3, allumeur 1000 K, release/_build_v13), puis GitHub (campagne-v4, ref v1.3) depuis 65 s,
+maxUa 0,3, arrêt T1 + 420 s. Construit par v12_ranzi/construire_V13_serie.sh.
+Étape 2a (60 -> 65 s, maxUa 3) calculée en local le 26/11/2026 avec release/_build_v13 ; suite sur GitHub depuis 65 s (ref v1.3).
